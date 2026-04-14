@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Server, Cpu, HardDrive, Activity, Users, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
+import api from "../lib/api";
 
-const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: string, value: string, color: string }) => (
+const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: string }) => (
   <Card className="overflow-hidden border-none shadow-md bg-card/50 backdrop-blur-sm">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
@@ -19,6 +21,28 @@ const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: strin
 );
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<any>({
+    onlinePlayers: 0,
+    cpuUsage: "0%",
+    diskUsage: "0 GB",
+    status: "Yükleniyor..."
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/api/stats");
+        setStats(res.data);
+      } catch (err) {
+        console.error("Stats error:", err);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000); // 30 saniyede bir güncelle
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="space-y-8">
       <div>
@@ -27,10 +51,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={Activity} label="Sunucu Durumu" value="Aktif" color="bg-emerald-500" />
-        <StatCard icon={Users} label="Online Oyuncu" value="1,248" color="bg-blue-500" />
-        <StatCard icon={Cpu} label="CPU Kullanımı" value="12%" color="bg-amber-500" />
-        <StatCard icon={HardDrive} label="Disk Alanı" value="42 GB" color="bg-purple-500" />
+        <StatCard icon={Activity} label="Sunucu Durumu" value={stats.status} color="bg-emerald-500" />
+        <StatCard icon={Users} label="Online Oyuncu" value={stats.onlinePlayers} color="bg-blue-500" />
+        <StatCard icon={Cpu} label="CPU Kullanımı" value={stats.cpuUsage} color="bg-amber-500" />
+        <StatCard icon={HardDrive} label="Disk Alanı" value={stats.diskUsage} color="bg-purple-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
@@ -8,6 +8,9 @@ import FileExplorer from "./pages/FileExplorer";
 import DatabaseManager from "./pages/DatabaseManager";
 import Console from "./pages/Console";
 import SetupPage from "./pages/SetupPage";
+import PlayerManager from "./pages/PlayerManager";
+import AccountManager from "./pages/AccountManager";
+import Settings from "./pages/Settings";
 
 const SidebarItem = ({ icon: Icon, label, to, active }: { icon: any, label: string, to: string, active: boolean }) => (
   <Link to={to}>
@@ -41,9 +44,12 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
 
         <nav className="flex-1 px-4 space-y-2">
           <SidebarItem icon={LayoutDashboard} label={isSidebarOpen ? "Dashboard" : ""} to="/" active={location.pathname === "/"} />
-          <SidebarItem icon={FolderTree} label={isSidebarOpen ? "File Explorer" : ""} to="/files" active={location.pathname === "/files"} />
-          <SidebarItem icon={Database} label={isSidebarOpen ? "Database" : ""} to="/db" active={location.pathname === "/db"} />
+          <SidebarItem icon={Users} label={isSidebarOpen ? "Oyuncular" : ""} to="/players" active={location.pathname === "/players"} />
+          <SidebarItem icon={UserCircle} label={isSidebarOpen ? "Hesaplar" : ""} to="/accounts" active={location.pathname === "/accounts"} />
+          <SidebarItem icon={FolderTree} label={isSidebarOpen ? "Dosyalar" : ""} to="/files" active={location.pathname === "/files"} />
+          <SidebarItem icon={Database} label={isSidebarOpen ? "Veritabanı" : ""} to="/db" active={location.pathname === "/db"} />
           <SidebarItem icon={Terminal} label={isSidebarOpen ? "Console" : ""} to="/console" active={location.pathname === "/console"} />
+          <SidebarItem icon={SettingsIcon} label={isSidebarOpen ? "Ayarlar" : ""} to="/settings" active={location.pathname === "/settings"} />
         </nav>
 
         <div className="p-4 border-t space-y-2">
@@ -100,9 +106,12 @@ export default function App() {
       <Layout onLogout={handleLogout}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/players" element={<PlayerManager />} />
+          <Route path="/accounts" element={<AccountManager />} />
           <Route path="/files" element={<FileExplorer />} />
           <Route path="/db" element={<DatabaseManager />} />
           <Route path="/console" element={<Console />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>

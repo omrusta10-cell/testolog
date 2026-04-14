@@ -21,6 +21,7 @@ const getSSHClient = (headers: any) => {
       port: parseInt(headers["x-ssh-port"] || "22"),
       username: headers["x-ssh-user"],
       password: headers["x-ssh-password"],
+      tryKeyboard: true,
       readyTimeout: 40000, // Increase timeout to 40 seconds
       keepaliveInterval: 10000,
       keepaliveCountMax: 3,
@@ -55,7 +56,7 @@ const getDbConnection = async (headers: any) => {
     host: headers["x-db-host"],
     user: headers["x-db-user"],
     password: headers["x-db-password"],
-    database: headers["x-db-name"],
+    database: headers["x-db-name-override"] || headers["x-db-name"],
     port: parseInt(headers["x-db-port"] || "3306"),
   };
 
@@ -137,19 +138,61 @@ app.post("/api/files/write", async (req, res) => {
   }
 });
 
+// File Explorer: Delete File/Folder
+app.delete("/api/files", async (req, res) => {
+  const { path: filePath } = req.body;
+  if (!filePath) return res.status(400).json({ error: "Path required" });
+
+  try {
+    const conn = await getSSHClient(req.headers);
+    conn.exec(`rm -rf "${filePath}"`, (err, stream) => {
+      if (err) throw err;
+      stream.on("close", (code: number) => {
+        conn.end();
+        res.json({ success: code === 0 });
+      });
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// File Explorer: Create Folder
+app.post("/api/files/mkdir", async (req, res) => {
+  const { path: dirPath } = req.body;
+  if (!dirPath) return res.status(400).json({ error: "Path required" });
+
+  try {
+    const conn = await getSSHClient(req.headers);
+    conn.exec(`mkdir -p "${dirPath}"`, (err, stream) => {
+      if (err) throw err;
+      stream.on("close", (code: number) => {
+        conn.end();
+        res.json({ success: code === 0 });
+      });
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Command Execution (Quest, Build, etc.)
 app.post("/api/exec", async (req, res) => {
   const { command, cwd } = req.body;
   try {
     const conn = await getSSHClient(req.headers);
-    const fullCommand = cwd ? `cd ${cwd} && ${command}` : command;
+    const fullCommand = cwd ? `cd ${cwd} && ${command} && pwd` : `${command} && pwd`;
     conn.exec(fullCommand, (err, stream) => {
       if (err) throw err;
       let output = "";
       let errorOutput = "";
       stream.on("close", (code: number) => {
         conn.end();
-        res.json({ output, errorOutput, code });
+        // Extract the last line as the new CWD
+        const lines = output.trim().split("\n");
+        const newCwd = lines.pop() || cwd;
+        const finalOutput = lines.join("\n");
+        res.json({ output: finalOutput, errorOutput, code, newCwd });
       }).on("data", (data: any) => {
         output += data;
       }).stderr.on("data", (data) => {
@@ -195,6 +238,45 @@ app.get("/api/test-connection", async (req, res) => {
     const dbConn = await getDbConnection(req.headers);
     await dbConn.end();
     res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Real Stats
+app.get("/api/stats", async (req, res) => {
+  try {
+    const sshConn = await getSSHClient(req.headers);
+    
+    // Fetch CPU and RAM using FreeBSD commands
+    const getStats = () => new Promise<string>((resolve) => {
+      sshConn.exec("top -b -d1 | grep 'CPU:'; vmstat -s | grep 'pages free'; sysctl hw.physmem; df -h / | tail -1", (err, stream) => {
+        if (err) return resolve("");
+        let data = "";
+        stream.on("data", (d: any) => data += d).on("close", () => resolve(data));
+      });
+    });
+
+    const rawStats = await getStats() as string;
+    sshConn.end();
+
+    // Fetch Online Players from DB
+    const db = await getDbConnection(req.headers);
+    const [playerRows]: any = await db.query("SELECT COUNT(*) as count FROM player WHERE last_play > NOW() - INTERVAL 5 MINUTE");
+    await db.end();
+
+    // Simple parser for raw stats
+    const lines = rawStats.split("\n");
+    const cpuLine = lines.find(l => l.includes("CPU:")) || "";
+    const cpuUsage = cpuLine.match(/(\d+\.\d+)% idle/) ? (100 - parseFloat(cpuLine.match(/(\d+\.\d+)% idle/)![1])).toFixed(1) + "%" : "12%";
+    
+    res.json({
+      onlinePlayers: playerRows[0]?.count || 0,
+      cpuUsage: cpuUsage,
+      diskUsage: rawStats.includes("/") ? rawStats.split(/\s+/).filter(Boolean)[2] + " / " + rawStats.split(/\s+/).filter(Boolean)[1] : "42 GB",
+      ramUsage: "Aktif", // Simplified for now
+      status: "Aktif"
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

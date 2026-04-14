@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Folder, File, ChevronRight, ChevronLeft, Save, Play, RefreshCw, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Folder, File, ChevronRight, ChevronLeft, Save, Play, RefreshCw, Trash2, FolderPlus, FilePlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/scroll-area";
+import { Input } from "../components/ui/input";
 import Editor from "@monaco-editor/react";
 import api from "../lib/api";
 import { toast } from "sonner";
@@ -21,6 +22,8 @@ export default function FileExplorer() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [showNewFolder, setShowNewFolder] = useState(false);
 
   const fetchFiles = async (path: string) => {
     setLoading(true);
@@ -65,6 +68,34 @@ export default function FileExplorer() {
     }
   };
 
+  const handleDelete = async (fileName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const pathToDelete = `${currentPath}/${fileName}`.replace(/\/+/g, "/");
+    if (!confirm(`${fileName} silinecek, emin misiniz?`)) return;
+
+    try {
+      await api.delete("/api/files", { data: { path: pathToDelete } });
+      toast.success("Silindi");
+      fetchFiles(currentPath);
+    } catch (err: any) {
+      toast.error("Silinemedi: " + err.message);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName) return;
+    const newPath = `${currentPath}/${newFolderName}`.replace(/\/+/g, "/");
+    try {
+      await api.post("/api/files/mkdir", { path: newPath });
+      toast.success("Klasör oluşturuldu");
+      setNewFolderName("");
+      setShowNewFolder(false);
+      fetchFiles(currentPath);
+    } catch (err: any) {
+      toast.error("Oluşturulamadı: " + err.message);
+    }
+  };
+
   const goBack = () => {
     const parts = currentPath.split("/").filter(Boolean);
     parts.pop();
@@ -82,6 +113,9 @@ export default function FileExplorer() {
           <h2 className="text-2xl font-bold tracking-tight">{currentPath}</h2>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowNewFolder(!showNewFolder)} className="gap-2">
+            <FolderPlus size={16} /> Yeni Klasör
+          </Button>
           {isEditing && (
             <Button onClick={handleSave} className="gap-2">
               <Save size={18} /> Kaydet
@@ -92,6 +126,19 @@ export default function FileExplorer() {
           </Button>
         </div>
       </div>
+
+      {showNewFolder && (
+        <Card className="p-4 flex gap-2 items-center bg-muted/30">
+          <Input 
+            placeholder="Klasör Adı" 
+            value={newFolderName} 
+            onChange={(e) => setNewFolderName(e.target.value)}
+            className="max-w-xs"
+          />
+          <Button onClick={handleCreateFolder}>Oluştur</Button>
+          <Button variant="ghost" onClick={() => setShowNewFolder(false)}>İptal</Button>
+        </Card>
+      )}
 
       <div className="grid grid-cols-12 gap-6 flex-1 overflow-hidden">
         {/* File List */}
@@ -114,7 +161,17 @@ export default function FileExplorer() {
                       <File size={18} className="text-muted-foreground" />
                     )}
                     <span className="flex-1 truncate text-sm font-medium">{file.name}</span>
-                    <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleDelete(file.name, e)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                      <ChevronRight size={14} />
+                    </div>
                   </div>
                 ))}
               </div>

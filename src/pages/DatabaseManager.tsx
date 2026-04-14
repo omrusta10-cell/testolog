@@ -9,6 +9,8 @@ import api from "../lib/api";
 import { toast } from "sonner";
 
 export default function DatabaseManager() {
+  const [databases] = useState(["player", "account", "common", "log"]);
+  const [selectedDb, setSelectedDb] = useState("player");
   const [tables, setTables] = useState<any[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
@@ -17,7 +19,9 @@ export default function DatabaseManager() {
 
   const fetchTables = async () => {
     try {
-      const res = await api.get("/api/db/tables");
+      const res = await api.get("/api/db/tables", {
+        headers: { "x-db-name-override": selectedDb }
+      });
       setTables(res.data);
     } catch (err: any) {
       toast.error("Tablolar yüklenemedi: " + err.message);
@@ -27,7 +31,9 @@ export default function DatabaseManager() {
   const fetchTableData = async (tableName: string) => {
     setLoading(true);
     try {
-      const res = await api.get(`/api/db/data?table=${tableName}`);
+      const res = await api.get(`/api/db/data?table=${tableName}`, {
+        headers: { "x-db-name-override": selectedDb }
+      });
       setData(res.data);
       setSelectedTable(tableName);
     } catch (err: any) {
@@ -39,7 +45,7 @@ export default function DatabaseManager() {
 
   useEffect(() => {
     fetchTables();
-  }, []);
+  }, [selectedDb]);
 
   const filteredData = data.filter(row => 
     Object.values(row).some(val => String(val).toLowerCase().includes(search.toLowerCase()))
@@ -48,7 +54,22 @@ export default function DatabaseManager() {
   return (
     <div className="space-y-6 h-[calc(100vh-120px)] flex flex-col">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Veritabanı Yönetimi</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold tracking-tight">Veritabanı Yönetimi</h2>
+          <div className="flex bg-muted p-1 rounded-md">
+            {databases.map(db => (
+              <button
+                key={db}
+                onClick={() => setSelectedDb(db)}
+                className={`px-3 py-1 text-xs font-medium rounded-sm transition-all ${
+                  selectedDb === db ? "bg-background shadow-sm" : "hover:text-primary"
+                }`}
+              >
+                {db}
+              </button>
+            ))}
+          </div>
+        </div>
         <Button variant="outline" size="icon" onClick={fetchTables}>
           <RefreshCw size={18} />
         </Button>

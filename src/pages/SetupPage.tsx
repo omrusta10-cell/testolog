@@ -13,7 +13,7 @@ export default function SetupPage({ onConnected }: { onConnected: () => void }) 
     sshPort: "22",
     sshUser: "root",
     sshPassword: "",
-    dbHost: "",
+    dbHost: "127.0.0.1",
     dbPort: "3306",
     dbUser: "root",
     dbPassword: "",
