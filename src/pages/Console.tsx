@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal as TerminalIcon, Play, Trash2, Send } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import api from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { ScrollArea } from "../components/ui/scroll-area";
+import api from "../lib/api";
 import { toast } from "sonner";
 
 interface LogEntry {
