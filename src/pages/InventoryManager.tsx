@@ -7,34 +7,50 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { ITEM_NAMES } from "../lib/mappings";
 
 export default function InventoryManager() {
   const [items, setItems] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchItems = async () => {
+  const fetchItemsAndPlayers = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=item", {
+      // Fetch items
+      const itemRes = await api.get("/api/db/data?table=item", {
         headers: { "x-db-name-override": "player" }
       });
-      setItems(res.data);
+      
+      // Fetch players for mapping
+      const playerRes = await api.get("/api/db/data?table=player", {
+        headers: { "x-db-name-override": "player" }
+      });
+
+      const playerMap: Record<number, string> = {};
+      playerRes.data.forEach((p: any) => {
+        playerMap[p.id] = p.name;
+      });
+
+      setPlayers(playerMap);
+      setItems(itemRes.data);
     } catch (err: any) {
-      toast.error("Eşya verileri yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchItems();
+    fetchItemsAndPlayers();
   }, []);
 
   const filteredItems = items.filter(item => 
     String(item.owner_id).includes(search) || 
     String(item.vnum).includes(search) ||
-    String(item.id).includes(search)
+    String(item.id).includes(search) ||
+    (players[item.owner_id] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -44,7 +60,7 @@ export default function InventoryManager() {
           <h2 className="text-3xl font-bold tracking-tight">Envanter Yönetimi</h2>
           <p className="text-muted-foreground">Oyuncuların üzerindeki eşyaları (player.item) görüntüleyin ve yönetin.</p>
         </div>
-        <Button variant="outline" onClick={fetchItems} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchItemsAndPlayers} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -58,7 +74,7 @@ export default function InventoryManager() {
             <div className="relative w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Eşya ID, VNUM veya Sahip ID ile ara..."
+                placeholder="Eşya ID, VNUM veya Oyuncu Adı ile ara..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -72,8 +88,8 @@ export default function InventoryManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead>Sahip ID</TableHead>
-                  <TableHead>VNUM</TableHead>
+                  <TableHead>Sahip (Karakter Adı)</TableHead>
+                  <TableHead>Eşya (VNUM / İsim)</TableHead>
                   <TableHead>Adet</TableHead>
                   <TableHead>Konum</TableHead>
                   <TableHead>Sıra</TableHead>
@@ -86,9 +102,16 @@ export default function InventoryManager() {
                     <TableCell className="font-mono text-xs font-bold">{item.id}</TableCell>
                     <TableCell className="flex items-center gap-2">
                       <User size={14} className="text-muted-foreground" />
-                      <span className="font-medium">{item.owner_id}</span>
+                      <span className="font-medium text-blue-600">
+                        {players[item.owner_id] || `ID: ${item.owner_id}`}
+                      </span>
                     </TableCell>
-                    <TableCell className="font-mono text-blue-500">{item.vnum}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-mono text-emerald-600 font-bold text-xs">{item.vnum}</span>
+                        <span className="text-sm font-medium">{ITEM_NAMES[item.vnum] || "Bilinmeyen Eşya"}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{item.count}</TableCell>
                     <TableCell className="text-xs uppercase">{item.window}</TableCell>
                     <TableCell>{item.pos}</TableCell>

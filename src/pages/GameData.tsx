@@ -7,6 +7,7 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
 
 export default function GameData() {
   const [activeTab, setActiveTab] = useState<"items" | "mobs" | "skills" | "refine">("items");
@@ -128,12 +129,22 @@ export default function GameData() {
                   <TableHead className="text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {filteredData.map((item, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-mono text-xs font-bold">{item.vnum || item.id}</TableCell>
-                    <TableCell className="font-medium">{item.locale_name || item.name || item.dwName || "---"}</TableCell>
-                    <TableCell className="text-xs uppercase opacity-70">{item.type || item.szName || "---"}</TableCell>
+                  <TableBody>
+                {filteredData.map((item, i) => {
+                  const vnum = item.vnum || item.id;
+                  let displayName = item.locale_name || item.name || item.dwName || "---";
+                  
+                  if (activeTab === "items" && ITEM_NAMES[vnum]) {
+                    displayName = ITEM_NAMES[vnum];
+                  } else if (activeTab === "mobs" && MOB_NAMES[vnum]) {
+                    displayName = MOB_NAMES[vnum];
+                  }
+
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="font-mono text-xs font-bold">{vnum}</TableCell>
+                      <TableCell className="font-medium">{displayName}</TableCell>
+                      <TableCell className="text-xs uppercase opacity-70">{item.type || item.szName || "---"}</TableCell>
                     {activeTab === "items" ? (
                       <>
                         <TableCell>{item.limitvalue0 || 0}</TableCell>
@@ -161,7 +172,8 @@ export default function GameData() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+              })}
                 {filteredData.length === 0 && !loading && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-10 text-muted-foreground italic">

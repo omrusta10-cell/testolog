@@ -11,33 +11,47 @@ import { toast } from "sonner";
 
 export default function PlayerManager() {
   const [players, setPlayers] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const fetchPlayers = async () => {
+  const fetchPlayersAndAccounts = async () => {
     setLoading(true);
     try {
-      // Fetch players with basic info
-      const res = await api.get("/api/db/data?table=player", {
+      // Fetch players
+      const playerRes = await api.get("/api/db/data?table=player", {
         headers: { "x-db-name-override": "player" }
       });
-      setPlayers(res.data);
+      
+      // Fetch accounts for mapping
+      const accRes = await api.get("/api/db/data?table=account", {
+        headers: { "x-db-name-override": "account" }
+      });
+
+      const accMap: Record<number, string> = {};
+      accRes.data.forEach((a: any) => {
+        accMap[a.id] = a.login;
+      });
+
+      setAccounts(accMap);
+      setPlayers(playerRes.data);
     } catch (err: any) {
-      toast.error("Oyuncular yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPlayers();
+    fetchPlayersAndAccounts();
   }, []);
 
   const filteredPlayers = players.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
-    String(p.id).includes(search)
+    String(p.id).includes(search) ||
+    (accounts[p.account_id] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const handleEdit = (player: any) => {
@@ -52,7 +66,7 @@ export default function PlayerManager() {
       // But let's assume we'll add an update endpoint later or just toast success for now
       toast.success(`${selectedPlayer.name} başarıyla güncellendi (Simüle edildi)`);
       setIsEditDialogOpen(false);
-      fetchPlayers();
+      fetchPlayersAndAccounts();
     } catch (err: any) {
       toast.error("Güncelleme hatası: " + err.message);
     }
@@ -65,7 +79,7 @@ export default function PlayerManager() {
           <h2 className="text-3xl font-bold tracking-tight">Oyuncu Yönetimi</h2>
           <p className="text-muted-foreground">Oyuncu bilgilerini düzenleyin, banlayın veya yetki verin.</p>
         </div>
-        <Button variant="outline" onClick={fetchPlayers} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchPlayersAndAccounts} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -91,6 +105,7 @@ export default function PlayerManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">ID</TableHead>
+                  <TableHead>Hesap</TableHead>
                   <TableHead>İsim</TableHead>
                   <TableHead>Level</TableHead>
                   <TableHead>Exp</TableHead>
@@ -103,7 +118,10 @@ export default function PlayerManager() {
                 {filteredPlayers.map((player) => (
                   <TableRow key={player.id}>
                     <TableCell className="font-mono text-xs">{player.id}</TableCell>
-                    <TableCell className="font-medium">{player.name}</TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {accounts[player.account_id] || `ID: ${player.account_id}`}
+                    </TableCell>
+                    <TableCell className="font-bold">{player.name}</TableCell>
                     <TableCell>{player.level}</TableCell>
                     <TableCell>{player.exp.toLocaleString()}</TableCell>
                     <TableCell>{player.gold.toLocaleString()}</TableCell>

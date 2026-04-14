@@ -10,30 +10,45 @@ import { toast } from "sonner";
 
 export default function GuildManager() {
   const [guilds, setGuilds] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchGuilds = async () => {
+  const fetchGuildsAndPlayers = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=guild", {
+      // Fetch guilds
+      const guildRes = await api.get("/api/db/data?table=guild", {
         headers: { "x-db-name-override": "player" }
       });
-      setGuilds(res.data);
+      
+      // Fetch players for mapping leader names
+      const playerRes = await api.get("/api/db/data?table=player", {
+        headers: { "x-db-name-override": "player" }
+      });
+
+      const playerMap: Record<number, string> = {};
+      playerRes.data.forEach((p: any) => {
+        playerMap[p.id] = p.name;
+      });
+
+      setPlayers(playerMap);
+      setGuilds(guildRes.data);
     } catch (err: any) {
-      toast.error("Lonca verileri yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchGuilds();
+    fetchGuildsAndPlayers();
   }, []);
 
   const filteredGuilds = guilds.filter(g => 
     g.name.toLowerCase().includes(search.toLowerCase()) || 
-    String(g.id).includes(search)
+    String(g.id).includes(search) ||
+    (players[g.master] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -43,7 +58,7 @@ export default function GuildManager() {
           <h2 className="text-3xl font-bold tracking-tight">Lonca Yönetimi</h2>
           <p className="text-muted-foreground">Sunucudaki loncaları (player.guild) görüntüleyin ve yönetin.</p>
         </div>
-        <Button variant="outline" onClick={fetchGuilds} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchGuildsAndPlayers} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -57,7 +72,7 @@ export default function GuildManager() {
             <div className="relative w-72">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Lonca adı veya ID ile ara..."
+                placeholder="Lonca veya Lider adı ile ara..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -72,7 +87,7 @@ export default function GuildManager() {
                 <TableRow>
                   <TableHead className="w-[80px]">ID</TableHead>
                   <TableHead>Lonca Adı</TableHead>
-                  <TableHead>Lider ID</TableHead>
+                  <TableHead>Lider (Karakter)</TableHead>
                   <TableHead>Level</TableHead>
                   <TableHead>Exp</TableHead>
                   <TableHead>Puan</TableHead>
@@ -85,7 +100,9 @@ export default function GuildManager() {
                   <TableRow key={guild.id}>
                     <TableCell className="font-mono text-xs">{guild.id}</TableCell>
                     <TableCell className="font-bold text-blue-500">{guild.name}</TableCell>
-                    <TableCell className="text-xs">{guild.master}</TableCell>
+                    <TableCell className="font-medium text-emerald-600">
+                      {players[guild.master] || `ID: ${guild.master}`}
+                    </TableCell>
                     <TableCell>{guild.level}</TableCell>
                     <TableCell>{guild.exp.toLocaleString()}</TableCell>
                     <TableCell>

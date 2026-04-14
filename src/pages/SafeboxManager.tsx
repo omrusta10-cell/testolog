@@ -10,30 +10,45 @@ import { toast } from "sonner";
 
 export default function SafeboxManager() {
   const [safeboxes, setSafeboxes] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchSafeboxes = async () => {
+  const fetchSafeboxesAndAccounts = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=safebox", {
+      // Fetch safeboxes
+      const sbRes = await api.get("/api/db/data?table=safebox", {
         headers: { "x-db-name-override": "player" }
       });
-      setSafeboxes(res.data);
+      
+      // Fetch accounts for mapping
+      const accRes = await api.get("/api/db/data?table=account", {
+        headers: { "x-db-name-override": "account" }
+      });
+
+      const accMap: Record<number, string> = {};
+      accRes.data.forEach((a: any) => {
+        accMap[a.id] = a.login;
+      });
+
+      setAccounts(accMap);
+      setSafeboxes(sbRes.data);
     } catch (err: any) {
-      toast.error("Depo verileri yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSafeboxes();
+    fetchSafeboxesAndAccounts();
   }, []);
 
   const filteredSafeboxes = safeboxes.filter(sb => 
     String(sb.account_id).includes(search) || 
-    String(sb.password).includes(search)
+    String(sb.password).includes(search) ||
+    (accounts[sb.account_id] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -43,7 +58,7 @@ export default function SafeboxManager() {
           <h2 className="text-3xl font-bold tracking-tight">Depo Yönetimi</h2>
           <p className="text-muted-foreground">Oyuncu depolarını ve şifrelerini (player.safebox) yönetin.</p>
         </div>
-        <Button variant="outline" onClick={fetchSafeboxes} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchSafeboxesAndAccounts} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -57,7 +72,7 @@ export default function SafeboxManager() {
             <div className="relative w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Hesap ID veya Şifre ile ara..."
+                placeholder="Kullanıcı Adı veya Şifre ile ara..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -70,7 +85,7 @@ export default function SafeboxManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Hesap ID</TableHead>
+                  <TableHead>Hesap (Kullanıcı Adı)</TableHead>
                   <TableHead>Depo Şifresi</TableHead>
                   <TableHead>Altın</TableHead>
                   <TableHead className="text-right">İşlemler</TableHead>
@@ -79,8 +94,10 @@ export default function SafeboxManager() {
               <TableBody>
                 {filteredSafeboxes.map((sb, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-mono font-bold">{sb.account_id}</TableCell>
-                    <TableCell className="font-mono text-blue-500">{sb.password || "Şifresiz"}</TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {accounts[sb.account_id] || `ID: ${sb.account_id}`}
+                    </TableCell>
+                    <TableCell className="font-mono text-amber-600 font-bold">{sb.password || "Şifresiz"}</TableCell>
                     <TableCell className="text-emerald-600 font-mono">{sb.gold?.toLocaleString() || 0}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

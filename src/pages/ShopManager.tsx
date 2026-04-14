@@ -7,6 +7,7 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
 
 export default function ShopManager() {
   const [shops, setShops] = useState<any[]>([]);
@@ -96,7 +97,7 @@ export default function ShopManager() {
                     }`}
                   >
                     <div>
-                      <p className="font-bold text-sm">{shop.name || `NPC: ${shop.npc_vnum}`}</p>
+                      <p className="font-bold text-sm">{shop.name || MOB_NAMES[shop.npc_vnum] || `NPC: ${shop.npc_vnum}`}</p>
                       <p className="text-xs text-muted-foreground font-mono">VNUM: {shop.npc_vnum}</p>
                     </div>
                     <Package size={16} className="opacity-20" />
@@ -127,7 +128,7 @@ export default function ShopManager() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Eşya VNUM</TableHead>
+                    <TableHead>Eşya (VNUM / İsim)</TableHead>
                     <TableHead>Adet</TableHead>
                     <TableHead className="text-right">İşlemler</TableHead>
                   </TableRow>
@@ -135,7 +136,12 @@ export default function ShopManager() {
                 <TableBody>
                   {shopItems.map((item, i) => (
                     <TableRow key={i}>
-                      <TableCell className="font-mono font-bold">{item.item_vnum}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-mono font-bold text-xs">{item.item_vnum}</span>
+                          <span className="text-sm font-medium text-blue-600">{ITEM_NAMES[item.item_vnum] || "Bilinmeyen Eşya"}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{item.count}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

@@ -10,30 +10,46 @@ import { toast } from "sonner";
 
 export default function MarriageManager() {
   const [marriages, setMarriages] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchMarriages = async () => {
+  const fetchMarriagesAndPlayers = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=marriage", {
+      // Fetch marriages
+      const mRes = await api.get("/api/db/data?table=marriage", {
         headers: { "x-db-name-override": "player" }
       });
-      setMarriages(res.data);
+      
+      // Fetch players for mapping
+      const playerRes = await api.get("/api/db/data?table=player", {
+        headers: { "x-db-name-override": "player" }
+      });
+
+      const playerMap: Record<number, string> = {};
+      playerRes.data.forEach((p: any) => {
+        playerMap[p.id] = p.name;
+      });
+
+      setPlayers(playerMap);
+      setMarriages(mRes.data);
     } catch (err: any) {
-      toast.error("Evlilik verileri yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMarriages();
+    fetchMarriagesAndPlayers();
   }, []);
 
   const filteredMarriages = marriages.filter(m => 
     String(m.pid1).includes(search) || 
-    String(m.pid2).includes(search)
+    String(m.pid2).includes(search) ||
+    (players[m.pid1] || "").toLowerCase().includes(search.toLowerCase()) ||
+    (players[m.pid2] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -43,7 +59,7 @@ export default function MarriageManager() {
           <h2 className="text-3xl font-bold tracking-tight">Evlilik Yönetimi</h2>
           <p className="text-muted-foreground">Oyuncuların evlilik kayıtlarını (player.marriage) yönetin.</p>
         </div>
-        <Button variant="outline" onClick={fetchMarriages} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchMarriagesAndPlayers} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -57,7 +73,7 @@ export default function MarriageManager() {
             <div className="relative w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Oyuncu ID (PID1 veya PID2) ile ara..."
+                placeholder="Karakter Adı veya ID ile ara..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -70,8 +86,8 @@ export default function MarriageManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Eş 1 (PID)</TableHead>
-                  <TableHead>Eş 2 (PID)</TableHead>
+                  <TableHead>Eş 1 (Karakter)</TableHead>
+                  <TableHead>Eş 2 (Karakter)</TableHead>
                   <TableHead>Sevgi Puanı</TableHead>
                   <TableHead>Evlilik Tarihi</TableHead>
                   <TableHead className="text-right">İşlemler</TableHead>
@@ -80,9 +96,13 @@ export default function MarriageManager() {
               <TableBody>
                 {filteredMarriages.map((m, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-mono font-bold">{m.pid1}</TableCell>
-                    <TableCell className="font-mono font-bold">{m.pid2}</TableCell>
-                    <TableCell className="text-pink-600 font-bold">{m.love_point}</TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {players[m.pid1] || `ID: ${m.pid1}`}
+                    </TableCell>
+                    <TableCell className="font-medium text-pink-600">
+                      {players[m.pid2] || `ID: ${m.pid2}`}
+                    </TableCell>
+                    <TableCell className="text-emerald-600 font-bold">{m.love_point}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {m.time ? new Date(m.time * 1000).toLocaleString() : "---"}
                     </TableCell>

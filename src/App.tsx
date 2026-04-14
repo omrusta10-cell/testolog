@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
@@ -21,6 +21,9 @@ import InventoryManager from "./pages/InventoryManager";
 import SafeboxManager from "./pages/SafeboxManager";
 import PlayerDeletedManager from "./pages/PlayerDeletedManager";
 import MarriageManager from "./pages/MarriageManager";
+import LogViewer from "./pages/LogViewer";
+import MessengerManager from "./pages/MessengerManager";
+import AffectManager from "./pages/AffectManager";
 
 const SidebarItem = ({ icon: Icon, label, to, active }: { icon: any, label: string, to: string, active: boolean }) => (
   <Link to={to}>
@@ -65,9 +68,12 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
           <SidebarItem icon={UserCircle} label={isSidebarOpen ? "Hesaplar" : ""} to="/accounts" active={location.pathname === "/accounts"} />
           <SidebarItem icon={Trophy} label={isSidebarOpen ? "Loncalar" : ""} to="/guilds" active={location.pathname === "/guilds"} />
           <SidebarItem icon={Heart} label={isSidebarOpen ? "Evlilikler" : ""} to="/marriages" active={location.pathname === "/marriages"} />
+          <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Arkadaş Listeleri" : ""} to="/messenger" active={location.pathname === "/messenger"} />
+          <SidebarItem icon={Zap} label={isSidebarOpen ? "Aktif Etkiler" : ""} to="/affects" active={location.pathname === "/affects"} />
           <SidebarItem icon={ShoppingBag} label={isSidebarOpen ? "Marketler" : ""} to="/shops" active={location.pathname === "/shops"} />
           <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Questler" : ""} to="/quests" active={location.pathname === "/quests"} />
           <SidebarItem icon={ShieldCheck} label={isSidebarOpen ? "GM Yönetimi" : ""} to="/gms" active={location.pathname === "/gms"} />
+          <SidebarItem icon={History} label={isSidebarOpen ? "Sistem Logları" : ""} to="/logs" active={location.pathname === "/logs"} />
           
           <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             {isSidebarOpen ? "Sistem" : "---"}
@@ -140,7 +146,10 @@ export default function App() {
           <Route path="/accounts" element={<AccountManager />} />
           <Route path="/guilds" element={<GuildManager />} />
           <Route path="/marriages" element={<MarriageManager />} />
+          <Route path="/messenger" element={<MessengerManager />} />
+          <Route path="/affects" element={<AffectManager />} />
           <Route path="/gms" element={<GMManager />} />
+          <Route path="/logs" element={<LogViewer />} />
           <Route path="/shops" element={<ShopManager />} />
           <Route path="/quests" element={<QuestManager />} />
           <Route path="/server-settings" element={<ServerSettings />} />
