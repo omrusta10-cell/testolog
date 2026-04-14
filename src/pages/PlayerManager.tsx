@@ -20,7 +20,9 @@ export default function PlayerManager() {
     setLoading(true);
     try {
       // Fetch players with basic info
-      const res = await api.get("/api/db/data?table=player");
+      const res = await api.get("/api/db/data?table=player", {
+        headers: { "x-db-name-override": "player" }
+      });
       setPlayers(res.data);
     } catch (err: any) {
       toast.error("Oyuncular yüklenemedi: " + err.message);

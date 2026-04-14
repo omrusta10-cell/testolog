@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Search, RefreshCw, Info, Sword, Shield, Ghost } from "lucide-react";
+import { Box, Search, RefreshCw, Info, Sword, Shield, Ghost, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -9,14 +9,21 @@ import api from "../lib/api";
 import { toast } from "sonner";
 
 export default function GameData() {
-  const [activeTab, setActiveTab] = useState<"items" | "mobs">("items");
+  const [activeTab, setActiveTab] = useState<"items" | "mobs" | "skills" | "refine">("items");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchData = async (tab: "items" | "mobs") => {
+  const fetchData = async (tab: "items" | "mobs" | "skills" | "refine") => {
     setLoading(true);
-    const table = tab === "items" ? "item_proto" : "mob_proto";
+    let table = "";
+    switch(tab) {
+      case "items": table = "item_proto"; break;
+      case "mobs": table = "mob_proto"; break;
+      case "skills": table = "skill_proto"; break;
+      case "refine": table = "refine_proto"; break;
+    }
+    
     try {
       const res = await api.get(`/api/db/data?table=${table}`, {
         headers: { "x-db-name-override": "player" }
@@ -35,7 +42,7 @@ export default function GameData() {
   }, []);
 
   const filteredData = data.filter(item => 
-    (item.locale_name || item.name || "").toLowerCase().includes(search.toLowerCase()) || 
+    (item.locale_name || item.name || item.dwName || "").toLowerCase().includes(search.toLowerCase()) || 
     String(item.vnum || item.id).includes(search)
   );
 
@@ -44,25 +51,25 @@ export default function GameData() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Oyun Verileri</h2>
-          <p className="text-muted-foreground">Item ve Mob prototiplerini (player.item_proto / player.mob_proto) inceleyin.</p>
+          <p className="text-muted-foreground">Prototip tablolarını (player.*_proto) inceleyin.</p>
         </div>
-        <div className="flex bg-muted p-1 rounded-md">
-          <button
-            onClick={() => fetchData("items")}
-            className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-all flex items-center gap-2 ${
-              activeTab === "items" ? "bg-background shadow-sm" : "hover:text-primary"
-            }`}
-          >
-            <Sword size={16} /> Item Proto
-          </button>
-          <button
-            onClick={() => fetchData("mobs")}
-            className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-all flex items-center gap-2 ${
-              activeTab === "mobs" ? "bg-background shadow-sm" : "hover:text-primary"
-            }`}
-          >
-            <Ghost size={16} /> Mob Proto
-          </button>
+        <div className="flex bg-muted p-1 rounded-md overflow-x-auto max-w-full">
+          {[
+            { id: "items", label: "Item Proto", icon: Sword },
+            { id: "mobs", label: "Mob Proto", icon: Ghost },
+            { id: "skills", label: "Skill Proto", icon: Zap },
+            { id: "refine", label: "Refine Proto", icon: RefreshCw }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => fetchData(tab.id as any)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                activeTab === tab.id ? "bg-background shadow-sm" : "hover:text-primary"
+              }`}
+            >
+              <tab.icon size={16} /> {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -70,8 +77,13 @@ export default function GameData() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              {activeTab === "items" ? <Box size={20} /> : <Ghost size={20} />}
-              {activeTab === "items" ? "Eşya Listesi" : "Yaratık Listesi"}
+              {activeTab === "items" && <Box size={20} />}
+              {activeTab === "mobs" && <Ghost size={20} />}
+              {activeTab === "skills" && <Zap size={20} />}
+              {activeTab === "refine" && <RefreshCw size={20} />}
+              {activeTab === "items" ? "Eşya Listesi" : 
+               activeTab === "mobs" ? "Yaratık Listesi" : 
+               activeTab === "skills" ? "Beceri Listesi" : "Yükseltme Listesi"}
             </CardTitle>
             <div className="relative w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -89,18 +101,28 @@ export default function GameData() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">VNUM</TableHead>
-                  <TableHead>İsim (Locale)</TableHead>
-                  <TableHead>Tip</TableHead>
+                  <TableHead className="w-[100px]">VNUM / ID</TableHead>
+                  <TableHead>İsim / Açıklama</TableHead>
+                  <TableHead>Tip / Detay</TableHead>
                   {activeTab === "items" ? (
                     <>
                       <TableHead>Seviye</TableHead>
                       <TableHead>Fiyat</TableHead>
                     </>
-                  ) : (
+                  ) : activeTab === "mobs" ? (
                     <>
                       <TableHead>Level</TableHead>
                       <TableHead>HP</TableHead>
+                    </>
+                  ) : activeTab === "skills" ? (
+                    <>
+                      <TableHead>Max Level</TableHead>
+                      <TableHead>Tür</TableHead>
+                    </>
+                  ) : (
+                    <>
+                      <TableHead>Maliyet</TableHead>
+                      <TableHead>Şans</TableHead>
                     </>
                   )}
                   <TableHead className="text-right">İşlem</TableHead>
@@ -110,17 +132,27 @@ export default function GameData() {
                 {filteredData.map((item, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-mono text-xs font-bold">{item.vnum || item.id}</TableCell>
-                    <TableCell className="font-medium">{item.locale_name || item.name}</TableCell>
-                    <TableCell className="text-xs uppercase opacity-70">{item.type}</TableCell>
+                    <TableCell className="font-medium">{item.locale_name || item.name || item.dwName || "---"}</TableCell>
+                    <TableCell className="text-xs uppercase opacity-70">{item.type || item.szName || "---"}</TableCell>
                     {activeTab === "items" ? (
                       <>
                         <TableCell>{item.limitvalue0 || 0}</TableCell>
                         <TableCell className="text-emerald-600 font-mono text-xs">{item.gold?.toLocaleString() || 0}</TableCell>
                       </>
-                    ) : (
+                    ) : activeTab === "mobs" ? (
                       <>
                         <TableCell>{item.level || 0}</TableCell>
                         <TableCell className="text-red-600 font-mono text-xs">{item.hp?.toLocaleString() || 0}</TableCell>
+                      </>
+                    ) : activeTab === "skills" ? (
+                      <>
+                        <TableCell>{item.dwMaxLevel || 0}</TableCell>
+                        <TableCell className="text-xs">{item.szType || "---"}</TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="text-emerald-600 font-mono text-xs">{item.cost?.toLocaleString() || 0}</TableCell>
+                        <TableCell className="font-bold text-blue-500">%{item.prob || 0}</TableCell>
                       </>
                     )}
                     <TableCell className="text-right">

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
@@ -15,6 +15,12 @@ import GMManager from "./pages/GMManager";
 import GuildManager from "./pages/GuildManager";
 import ServerSettings from "./pages/ServerSettings";
 import GameData from "./pages/GameData";
+import ShopManager from "./pages/ShopManager";
+import QuestManager from "./pages/QuestManager";
+import InventoryManager from "./pages/InventoryManager";
+import SafeboxManager from "./pages/SafeboxManager";
+import PlayerDeletedManager from "./pages/PlayerDeletedManager";
+import MarriageManager from "./pages/MarriageManager";
 
 const SidebarItem = ({ icon: Icon, label, to, active }: { icon: any, label: string, to: string, active: boolean }) => (
   <Link to={to}>
@@ -53,8 +59,14 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
             {isSidebarOpen ? "Yönetim" : "---"}
           </div>
           <SidebarItem icon={Users} label={isSidebarOpen ? "Oyuncular" : ""} to="/players" active={location.pathname === "/players"} />
+          <SidebarItem icon={UserX} label={isSidebarOpen ? "Silinenler" : ""} to="/players-deleted" active={location.pathname === "/players-deleted"} />
+          <SidebarItem icon={Package} label={isSidebarOpen ? "Envanter" : ""} to="/inventory" active={location.pathname === "/inventory"} />
+          <SidebarItem icon={Lock} label={isSidebarOpen ? "Depolar" : ""} to="/safebox" active={location.pathname === "/safebox"} />
           <SidebarItem icon={UserCircle} label={isSidebarOpen ? "Hesaplar" : ""} to="/accounts" active={location.pathname === "/accounts"} />
           <SidebarItem icon={Trophy} label={isSidebarOpen ? "Loncalar" : ""} to="/guilds" active={location.pathname === "/guilds"} />
+          <SidebarItem icon={Heart} label={isSidebarOpen ? "Evlilikler" : ""} to="/marriages" active={location.pathname === "/marriages"} />
+          <SidebarItem icon={ShoppingBag} label={isSidebarOpen ? "Marketler" : ""} to="/shops" active={location.pathname === "/shops"} />
+          <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Questler" : ""} to="/quests" active={location.pathname === "/quests"} />
           <SidebarItem icon={ShieldCheck} label={isSidebarOpen ? "GM Yönetimi" : ""} to="/gms" active={location.pathname === "/gms"} />
           
           <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -122,9 +134,15 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/players" element={<PlayerManager />} />
+          <Route path="/players-deleted" element={<PlayerDeletedManager />} />
+          <Route path="/inventory" element={<InventoryManager />} />
+          <Route path="/safebox" element={<SafeboxManager />} />
           <Route path="/accounts" element={<AccountManager />} />
           <Route path="/guilds" element={<GuildManager />} />
+          <Route path="/marriages" element={<MarriageManager />} />
           <Route path="/gms" element={<GMManager />} />
+          <Route path="/shops" element={<ShopManager />} />
+          <Route path="/quests" element={<QuestManager />} />
           <Route path="/server-settings" element={<ServerSettings />} />
           <Route path="/game-data" element={<GameData />} />
           <Route path="/files" element={<FileExplorer />} />
