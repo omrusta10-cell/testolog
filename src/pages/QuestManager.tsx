@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function QuestManager() {
   const [quests, setQuests] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Record<number, string>>({});
+  const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -27,9 +27,9 @@ export default function QuestManager() {
         headers: { "x-db-name-override": "player" }
       });
 
-      const playerMap: Record<number, string> = {};
+      const playerMap: Record<string, string> = {};
       playerRes.data.forEach((p: any) => {
-        playerMap[p.id] = p.name;
+        playerMap[String(p.id)] = p.name;
       });
 
       setPlayers(playerMap);
@@ -48,7 +48,7 @@ export default function QuestManager() {
   const filteredQuests = quests.filter(q => 
     (q.dwName || q.szName || "").toLowerCase().includes(search.toLowerCase()) || 
     String(q.dwPID).includes(search) ||
-    (players[q.dwPID] || "").toLowerCase().includes(search.toLowerCase())
+    (players[String(q.dwPID)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -95,8 +95,13 @@ export default function QuestManager() {
               <TableBody>
                 {filteredQuests.map((quest, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium text-blue-600">
-                      {players[quest.dwPID] || `ID: ${quest.dwPID}`}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-blue-600">
+                          {players[String(quest.dwPID)] || "Bilinmeyen Karakter"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {quest.dwPID}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="font-medium text-purple-600">{quest.szName}</TableCell>
                     <TableCell className="text-xs">{quest.szState}</TableCell>

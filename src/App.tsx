@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare, Ban, Globe } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
@@ -24,6 +24,8 @@ import MarriageManager from "./pages/MarriageManager";
 import LogViewer from "./pages/LogViewer";
 import MessengerManager from "./pages/MessengerManager";
 import AffectManager from "./pages/AffectManager";
+import BanwordManager from "./pages/BanwordManager";
+import PrivManager from "./pages/PrivManager";
 
 const SidebarItem = ({ icon: Icon, label, to, active }: { icon: any, label: string, to: string, active: boolean }) => (
   <Link to={to}>
@@ -70,6 +72,8 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
           <SidebarItem icon={Heart} label={isSidebarOpen ? "Evlilikler" : ""} to="/marriages" active={location.pathname === "/marriages"} />
           <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Arkadaş Listeleri" : ""} to="/messenger" active={location.pathname === "/messenger"} />
           <SidebarItem icon={Zap} label={isSidebarOpen ? "Aktif Etkiler" : ""} to="/affects" active={location.pathname === "/affects"} />
+          <SidebarItem icon={Ban} label={isSidebarOpen ? "Yasaklı Kelimeler" : ""} to="/banwords" active={location.pathname === "/banwords"} />
+          <SidebarItem icon={Globe} label={isSidebarOpen ? "Sunucu Oranları" : ""} to="/privs" active={location.pathname === "/privs"} />
           <SidebarItem icon={ShoppingBag} label={isSidebarOpen ? "Marketler" : ""} to="/shops" active={location.pathname === "/shops"} />
           <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Questler" : ""} to="/quests" active={location.pathname === "/quests"} />
           <SidebarItem icon={ShieldCheck} label={isSidebarOpen ? "GM Yönetimi" : ""} to="/gms" active={location.pathname === "/gms"} />
@@ -148,6 +152,8 @@ export default function App() {
           <Route path="/marriages" element={<MarriageManager />} />
           <Route path="/messenger" element={<MessengerManager />} />
           <Route path="/affects" element={<AffectManager />} />
+          <Route path="/banwords" element={<BanwordManager />} />
+          <Route path="/privs" element={<PrivManager />} />
           <Route path="/gms" element={<GMManager />} />
           <Route path="/logs" element={<LogViewer />} />
           <Route path="/shops" element={<ShopManager />} />

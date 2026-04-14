@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 export default function PlayerManager() {
   const [players, setPlayers] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<Record<number, string>>({});
+  const [accounts, setAccounts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
@@ -30,9 +30,9 @@ export default function PlayerManager() {
         headers: { "x-db-name-override": "account" }
       });
 
-      const accMap: Record<number, string> = {};
+      const accMap: Record<string, string> = {};
       accRes.data.forEach((a: any) => {
-        accMap[a.id] = a.login;
+        accMap[String(a.id)] = a.login;
       });
 
       setAccounts(accMap);
@@ -51,7 +51,7 @@ export default function PlayerManager() {
   const filteredPlayers = players.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
     String(p.id).includes(search) ||
-    (accounts[p.account_id] || "").toLowerCase().includes(search.toLowerCase())
+    (accounts[String(p.account_id)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const handleEdit = (player: any) => {
@@ -118,8 +118,13 @@ export default function PlayerManager() {
                 {filteredPlayers.map((player) => (
                   <TableRow key={player.id}>
                     <TableCell className="font-mono text-xs">{player.id}</TableCell>
-                    <TableCell className="font-medium text-blue-600">
-                      {accounts[player.account_id] || `ID: ${player.account_id}`}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-blue-600">
+                          {accounts[String(player.account_id)] || "Bilinmeyen Hesap"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {player.account_id}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="font-bold">{player.name}</TableCell>
                     <TableCell>{player.level}</TableCell>

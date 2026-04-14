@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function MarriageManager() {
   const [marriages, setMarriages] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Record<number, string>>({});
+  const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -27,9 +27,9 @@ export default function MarriageManager() {
         headers: { "x-db-name-override": "player" }
       });
 
-      const playerMap: Record<number, string> = {};
+      const playerMap: Record<string, string> = {};
       playerRes.data.forEach((p: any) => {
-        playerMap[p.id] = p.name;
+        playerMap[String(p.id)] = p.name;
       });
 
       setPlayers(playerMap);
@@ -48,8 +48,8 @@ export default function MarriageManager() {
   const filteredMarriages = marriages.filter(m => 
     String(m.pid1).includes(search) || 
     String(m.pid2).includes(search) ||
-    (players[m.pid1] || "").toLowerCase().includes(search.toLowerCase()) ||
-    (players[m.pid2] || "").toLowerCase().includes(search.toLowerCase())
+    (players[String(m.pid1)] || "").toLowerCase().includes(search.toLowerCase()) ||
+    (players[String(m.pid2)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -96,11 +96,21 @@ export default function MarriageManager() {
               <TableBody>
                 {filteredMarriages.map((m, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium text-blue-600">
-                      {players[m.pid1] || `ID: ${m.pid1}`}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-blue-600">
+                          {players[String(m.pid1)] || "Bilinmeyen Karakter"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {m.pid1}</span>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-medium text-pink-600">
-                      {players[m.pid2] || `ID: ${m.pid2}`}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-pink-600">
+                          {players[String(m.pid2)] || "Bilinmeyen Karakter"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {m.pid2}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-emerald-600 font-bold">{m.love_point}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">

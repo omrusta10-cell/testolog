@@ -27,9 +27,9 @@ export default function SafeboxManager() {
         headers: { "x-db-name-override": "account" }
       });
 
-      const accMap: Record<number, string> = {};
+      const accMap: Record<string, string> = {};
       accRes.data.forEach((a: any) => {
-        accMap[a.id] = a.login;
+        accMap[String(a.id)] = a.login;
       });
 
       setAccounts(accMap);
@@ -48,7 +48,7 @@ export default function SafeboxManager() {
   const filteredSafeboxes = safeboxes.filter(sb => 
     String(sb.account_id).includes(search) || 
     String(sb.password).includes(search) ||
-    (accounts[sb.account_id] || "").toLowerCase().includes(search.toLowerCase())
+    (accounts[String(sb.account_id)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -94,8 +94,13 @@ export default function SafeboxManager() {
               <TableBody>
                 {filteredSafeboxes.map((sb, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium text-blue-600">
-                      {accounts[sb.account_id] || `ID: ${sb.account_id}`}
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span className="text-blue-600 font-bold">
+                          {accounts[String(sb.account_id)] || "Bilinmeyen Hesap"}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-mono">ID: {sb.account_id}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="font-mono text-amber-600 font-bold">{sb.password || "Şifresiz"}</TableCell>
                     <TableCell className="text-emerald-600 font-mono">{sb.gold?.toLocaleString() || 0}</TableCell>

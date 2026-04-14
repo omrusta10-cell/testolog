@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function AffectManager() {
   const [affects, setAffects] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Record<number, string>>({});
+  const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -25,9 +25,9 @@ export default function AffectManager() {
         headers: { "x-db-name-override": "player" }
       });
 
-      const playerMap: Record<number, string> = {};
+      const playerMap: Record<string, string> = {};
       playerRes.data.forEach((p: any) => {
-        playerMap[p.id] = p.name;
+        playerMap[String(p.id)] = p.name;
       });
 
       setPlayers(playerMap);
@@ -44,7 +44,7 @@ export default function AffectManager() {
   }, []);
 
   const filteredAffects = affects.filter(a => 
-    (players[a.dwPID] || "").toLowerCase().includes(search.toLowerCase()) || 
+    (players[String(a.dwPID)] || "").toLowerCase().includes(search.toLowerCase()) || 
     String(a.dwPID).includes(search) ||
     String(a.bType).includes(search)
   );
@@ -94,11 +94,16 @@ export default function AffectManager() {
               <TableBody>
                 {filteredAffects.map((a, i) => (
                   <TableRow key={i}>
-                    <TableCell className="flex items-center gap-2">
-                      <User size={14} className="text-muted-foreground" />
-                      <span className="font-medium text-blue-600">
-                        {players[a.dwPID] || `PID: ${a.dwPID}`}
-                      </span>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-muted-foreground" />
+                        <div className="flex flex-col">
+                          <span className="font-medium text-blue-600">
+                            {players[String(a.dwPID)] || "Bilinmeyen Karakter"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono">ID: {a.dwPID}</span>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{a.bType}</TableCell>
                     <TableCell>{a.bApplyOn}</TableCell>

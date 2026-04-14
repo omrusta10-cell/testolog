@@ -11,7 +11,7 @@ import { ITEM_NAMES } from "../lib/mappings";
 
 export default function InventoryManager() {
   const [items, setItems] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Record<number, string>>({});
+  const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -28,9 +28,9 @@ export default function InventoryManager() {
         headers: { "x-db-name-override": "player" }
       });
 
-      const playerMap: Record<number, string> = {};
+      const playerMap: Record<string, string> = {};
       playerRes.data.forEach((p: any) => {
-        playerMap[p.id] = p.name;
+        playerMap[String(p.id)] = p.name;
       });
 
       setPlayers(playerMap);
@@ -50,7 +50,7 @@ export default function InventoryManager() {
     String(item.owner_id).includes(search) || 
     String(item.vnum).includes(search) ||
     String(item.id).includes(search) ||
-    (players[item.owner_id] || "").toLowerCase().includes(search.toLowerCase())
+    (players[String(item.owner_id)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -100,11 +100,16 @@ export default function InventoryManager() {
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-mono text-xs font-bold">{item.id}</TableCell>
-                    <TableCell className="flex items-center gap-2">
-                      <User size={14} className="text-muted-foreground" />
-                      <span className="font-medium text-blue-600">
-                        {players[item.owner_id] || `ID: ${item.owner_id}`}
-                      </span>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-muted-foreground" />
+                        <div className="flex flex-col">
+                          <span className="font-medium text-blue-600">
+                            {players[String(item.owner_id)] || "Bilinmeyen Karakter"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono">ID: {item.owner_id}</span>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">

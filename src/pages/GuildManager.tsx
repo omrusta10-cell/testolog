@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function GuildManager() {
   const [guilds, setGuilds] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Record<number, string>>({});
+  const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -27,9 +27,9 @@ export default function GuildManager() {
         headers: { "x-db-name-override": "player" }
       });
 
-      const playerMap: Record<number, string> = {};
+      const playerMap: Record<string, string> = {};
       playerRes.data.forEach((p: any) => {
-        playerMap[p.id] = p.name;
+        playerMap[String(p.id)] = p.name;
       });
 
       setPlayers(playerMap);
@@ -48,7 +48,7 @@ export default function GuildManager() {
   const filteredGuilds = guilds.filter(g => 
     g.name.toLowerCase().includes(search.toLowerCase()) || 
     String(g.id).includes(search) ||
-    (players[g.master] || "").toLowerCase().includes(search.toLowerCase())
+    (players[String(g.master)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -100,8 +100,13 @@ export default function GuildManager() {
                   <TableRow key={guild.id}>
                     <TableCell className="font-mono text-xs">{guild.id}</TableCell>
                     <TableCell className="font-bold text-blue-500">{guild.name}</TableCell>
-                    <TableCell className="font-medium text-emerald-600">
-                      {players[guild.master] || `ID: ${guild.master}`}
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-emerald-600">
+                          {players[String(guild.master)] || "Bilinmeyen Lider"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {guild.master}</span>
+                      </div>
                     </TableCell>
                     <TableCell>{guild.level}</TableCell>
                     <TableCell>{guild.exp.toLocaleString()}</TableCell>

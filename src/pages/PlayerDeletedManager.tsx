@@ -10,30 +10,43 @@ import { toast } from "sonner";
 
 export default function PlayerDeletedManager() {
   const [deletedPlayers, setDeletedPlayers] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchDeletedPlayers = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const res = await api.get("/api/db/data?table=player_deleted", {
         headers: { "x-db-name-override": "player" }
       });
+      
+      const accRes = await api.get("/api/db/data?table=account", {
+        headers: { "x-db-name-override": "account" }
+      });
+
+      const accMap: Record<string, string> = {};
+      accRes.data.forEach((a: any) => {
+        accMap[String(a.id)] = a.login;
+      });
+
+      setAccounts(accMap);
       setDeletedPlayers(res.data);
     } catch (err: any) {
-      toast.error("Silinen oyuncular yüklenemedi: " + err.message);
+      toast.error("Veriler yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDeletedPlayers();
+    fetchData();
   }, []);
 
   const filteredPlayers = deletedPlayers.filter(p => 
     (p.name || "").toLowerCase().includes(search.toLowerCase()) || 
-    String(p.id).includes(search)
+    String(p.id).includes(search) ||
+    (accounts[String(p.account_id)] || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -43,7 +56,7 @@ export default function PlayerDeletedManager() {
           <h2 className="text-3xl font-bold tracking-tight">Silinen Oyuncular</h2>
           <p className="text-muted-foreground">Silinmiş oyuncu kayıtlarını (player.player_deleted) görüntüleyin.</p>
         </div>
-        <Button variant="outline" onClick={fetchDeletedPlayers} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchData} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
@@ -71,6 +84,7 @@ export default function PlayerDeletedManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">ID</TableHead>
+                  <TableHead>Hesap</TableHead>
                   <TableHead>İsim</TableHead>
                   <TableHead>Level</TableHead>
                   <TableHead>Silinme Tarihi</TableHead>
@@ -81,7 +95,10 @@ export default function PlayerDeletedManager() {
                 {filteredPlayers.map((player, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-mono text-xs">{player.id}</TableCell>
-                    <TableCell className="font-medium">{player.name}</TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {accounts[String(player.account_id)] || `ID: ${player.account_id}`}
+                    </TableCell>
+                    <TableCell className="font-bold">{player.name}</TableCell>
                     <TableCell>{player.level}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {player.deleted_at ? new Date(player.deleted_at).toLocaleString() : "---"}
