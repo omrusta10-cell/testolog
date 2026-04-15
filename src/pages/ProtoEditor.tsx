@@ -11,6 +11,7 @@ import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
 import { useAppContext } from "../context/AppContext";
+import { safeRender } from "../lib/utils";
 
 export default function ProtoEditor() {
   const { tableMappings } = useAppContext();
@@ -135,8 +136,8 @@ export default function ProtoEditor() {
                   {filteredData.map((item, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="font-mono font-bold">{item.vnum}</TableCell>
-                      <TableCell className="font-medium text-blue-600">{item.locale_name || item.dwName || "---"}</TableCell>
-                      <TableCell className="text-muted-foreground">{item.name}</TableCell>
+                      <TableCell className="font-medium text-blue-600">{safeRender(item.locale_name || item.dwName) || "---"}</TableCell>
+                      <TableCell className="text-muted-foreground">{safeRender(item.name)}</TableCell>
                       {activeTab === "items" ? (
                         <>
                           <TableCell>{item.type}</TableCell>

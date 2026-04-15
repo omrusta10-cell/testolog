@@ -7,6 +7,7 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { safeRender } from "../lib/utils";
 
 export default function QuestManager() {
   const [quests, setQuests] = useState<any[]>([]);
@@ -46,7 +47,7 @@ export default function QuestManager() {
   }, []);
 
   const filteredQuests = quests.filter(q => 
-    (q.dwName || q.szName || "").toLowerCase().includes(search.toLowerCase()) || 
+    (String(q.dwName || q.szName || "")).toLowerCase().includes(search.toLowerCase()) || 
     String(q.dwPID).includes(search) ||
     (players[String(q.dwPID)] || "").toLowerCase().includes(search.toLowerCase())
   );
@@ -103,8 +104,8 @@ export default function QuestManager() {
                         <span className="text-[10px] text-muted-foreground font-mono">ID: {quest.dwPID}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium text-purple-600">{quest.szName}</TableCell>
-                    <TableCell className="text-xs">{quest.szState}</TableCell>
+                    <TableCell className="font-medium text-purple-600">{safeRender(quest.szName)}</TableCell>
+                    <TableCell className="text-xs">{safeRender(quest.szState)}</TableCell>
                     <TableCell className="font-mono font-bold">{quest.lValue}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

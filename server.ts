@@ -252,6 +252,10 @@ app.get("/api/db/data", async (req, res) => {
     await db.end();
     res.json(rows);
   } catch (error: any) {
+    console.error(`DB Error (table: ${table}):`, error.message);
+    if (error.code === "ER_NO_SUCH_TABLE") {
+      return res.status(404).json({ error: `Table '${table}' not found`, code: "TABLE_NOT_FOUND" });
+    }
     res.status(500).json({ error: error.message });
   }
 });

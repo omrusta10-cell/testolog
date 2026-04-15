@@ -11,6 +11,7 @@ import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES } from "../lib/mappings";
 import { useAppContext } from "../context/AppContext";
+import { safeRender } from "../lib/utils";
 
 export default function MarketAnalytics() {
   const { tableMappings } = useAppContext();
@@ -100,7 +101,8 @@ export default function MarketAnalytics() {
 
       // 3. Fetch or Mock Yang Transfers (log.yang_transfer_log)
       try {
-        const yangRes = await api.get("/api/db/data?table=yang_transfer_log", { headers: { "x-db-name-override": "log" } });
+        const yangTable = tableMappings["exchange_yang"] || "yang_transfer_log";
+        const yangRes = await api.get(`/api/db/data?table=${yangTable}`, { headers: { "x-db-name-override": "log" } });
         if (yangRes.data && yangRes.data.length > 0) {
           setYangTransfers(yangRes.data);
         } else {
@@ -131,7 +133,7 @@ export default function MarketAnalytics() {
   }, []);
 
   const filteredItems = marketItems.filter(i => 
-    i.name.toLowerCase().includes(search.toLowerCase()) || 
+    (safeRender(i.name)).toLowerCase().includes(search.toLowerCase()) || 
     String(i.vnum).includes(search)
   );
 
@@ -251,7 +253,7 @@ export default function MarketAnalytics() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="h-[300px] w-full">
+                      <div className="h-[300px] min-h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={selectedItem.history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>

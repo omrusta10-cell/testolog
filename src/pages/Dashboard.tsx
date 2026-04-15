@@ -98,7 +98,7 @@ export default function Dashboard() {
             <CardTitle className="flex items-center gap-2"><Activity size={18} className="text-blue-500"/> Oyuncu Aktifliği (Canlı)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
+            <div className="h-[300px] min-h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />

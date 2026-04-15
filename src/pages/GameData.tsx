@@ -9,6 +9,7 @@ import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
 import { useAppContext } from "../context/AppContext";
+import { safeRender } from "../lib/utils";
 
 export default function GameData() {
   const { tableMappings } = useAppContext();
@@ -47,7 +48,7 @@ export default function GameData() {
   }, []);
 
   const filteredData = data.filter(item => 
-    (item.locale_name || item.name || item.dwName || "").toLowerCase().includes(search.toLowerCase()) || 
+    (String(item.locale_name || item.name || item.dwName || "")).toLowerCase().includes(search.toLowerCase()) || 
     String(item.vnum || item.id).includes(search)
   );
 
@@ -147,8 +148,8 @@ export default function GameData() {
                   return (
                     <TableRow key={i}>
                       <TableCell className="font-mono text-xs font-bold">{vnum}</TableCell>
-                      <TableCell className="font-medium">{displayName}</TableCell>
-                      <TableCell className="text-xs uppercase opacity-70">{item.type || item.szName || "---"}</TableCell>
+                      <TableCell className="font-medium">{safeRender(displayName)}</TableCell>
+                      <TableCell className="text-xs uppercase opacity-70">{safeRender(item.type || item.szName) || "---"}</TableCell>
                     {activeTab === "items" ? (
                       <>
                         <TableCell>{item.limitvalue0 || 0}</TableCell>

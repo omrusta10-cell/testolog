@@ -9,6 +9,7 @@ import api from "../lib/api";
 import { toast } from "sonner";
 import { useAppContext } from "../context/AppContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "../components/ui/dialog";
+import { safeRender } from "../lib/utils";
 
 export default function SkillManager() {
   const { tableMappings } = useAppContext();
@@ -88,8 +89,8 @@ export default function SkillManager() {
                 {filteredSkills.map((s, i) => (
                   <TableRow key={i}>
                     <TableCell className="font-mono text-xs font-bold">{s.dwVnum || s.id}</TableCell>
-                    <TableCell className="font-medium text-blue-600">{s.szName}</TableCell>
-                    <TableCell className="text-xs uppercase opacity-70">{s.szType || "---"}</TableCell>
+                    <TableCell className="font-medium text-blue-600">{safeRender(s.szName)}</TableCell>
+                    <TableCell className="text-xs uppercase opacity-70">{safeRender(s.szType) || "---"}</TableCell>
                     <TableCell>{s.dwMaxLevel || 0}</TableCell>
                     <TableCell className="font-mono text-xs">{s.dwCoolTime || 0}</TableCell>
                     <TableCell className="text-right">
