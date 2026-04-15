@@ -21,35 +21,15 @@ const getSSHClient = (headers: any) => {
       port: parseInt(headers["x-ssh-port"] || "22"),
       username: headers["x-ssh-user"],
       password: headers["x-ssh-password"],
-      tryKeyboard: true,
-      readyTimeout: 60000, // 60 saniye
-      keepaliveInterval: 10000,
-      keepaliveCountMax: 3,
-      // Eski FreeBSD sürümleri için algoritma desteğini genişletiyoruz
-      algorithms: {
-        kex: [
-          "diffie-hellman-group14-sha1",
-          "diffie-hellman-group-exchange-sha256",
-          "diffie-hellman-group-exchange-sha1",
-          "diffie-hellman-group1-sha1"
-        ],
-        cipher: [
-          "aes128-ctr", "aes192-ctr", "aes256-ctr",
-          "aes128-gcm", "aes128-gcm@openssh.com",
-          "aes256-gcm", "aes256-gcm@openssh.com",
-          "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"
-        ],
-        serverHostKey: [
-          "ssh-rsa", "ssh-dss"
-        ]
-      }
+      readyTimeout: 60000,
+      debug: (msg: string) => console.log('SSH DEBUG:', msg) // Terminale detaylı log basar
     };
 
     if (!config.host || !config.username) {
       return reject(new Error("SSH bilgileri eksik."));
     }
 
-    console.log(`SSH Bağlantısı deneniyor: ${config.host}:${config.port} (Kullanıcı: ${config.username})`);
+    console.log(`SSH Bağlantısı deneniyor: ${config.host}:${config.port}`);
 
     conn
       .on("ready", () => {
@@ -57,12 +37,8 @@ const getSSHClient = (headers: any) => {
         resolve(conn);
       })
       .on("error", (err: any) => {
-        console.error("SSH Hatası Detayı:", err);
-        let customMsg = `SSH Hatası: ${err.message}`;
-        if (err.code === "ETIMEDOUT" || err.message.includes("handshake")) {
-          customMsg = "SSH Bağlantı Zaman Aşımı: Sunucuya ulaşılamıyor veya el sıkışma (handshake) başarısız oldu. Lütfen Windows Güvenlik Duvarı'nı kapatıp tekrar deneyin.";
-        }
-        reject(new Error(customMsg));
+        console.error("SSH KRİTİK HATA:", err);
+        reject(new Error(`SSH Hatası: ${err.message}`));
       })
       .on("timeout", () => {
         console.error("SSH Connection Timeout");
