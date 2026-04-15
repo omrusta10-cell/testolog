@@ -73,7 +73,8 @@ const getDbConnection = async (headers: any) => {
 
 // File Explorer: List Files
 app.get("/api/files", async (req, res) => {
-  const dirPath = (req.query.path as string) || "/usr/game";
+  const defaultPath = req.headers["x-game-path"] as string || "/usr/game";
+  const dirPath = (req.query.path as string) || defaultPath;
   try {
     const conn = await getSSHClient(req.headers);
     conn.sftp((err, sftp) => {
@@ -256,10 +257,11 @@ app.get("/api/stats", async (req, res) => {
 
     try {
       const sshConn = await getSSHClient(req.headers);
+      const gamePath = req.headers["x-game-path"] as string || "/usr/game";
       
       // Fetch CPU and RAM using FreeBSD commands
       const getStats = () => new Promise<string>((resolve) => {
-        sshConn.exec("top -b -d1 | grep 'CPU:'; vmstat -s | grep 'pages free'; sysctl hw.physmem; df -h / | tail -1", (err, stream) => {
+        sshConn.exec(`top -b -d1 | grep 'CPU:'; vmstat -s | grep 'pages free'; sysctl hw.physmem; df -h ${gamePath} | tail -1`, (err, stream) => {
           if (err) return resolve("");
           let data = "";
           stream.on("data", (d: any) => data += d).on("close", () => resolve(data));
@@ -276,7 +278,8 @@ app.get("/api/stats", async (req, res) => {
     try {
       // Fetch Online Players from DB
       const db = await getDbConnection(req.headers);
-      const [playerRows]: any = await db.query("SELECT COUNT(*) as count FROM player WHERE last_play > NOW() - INTERVAL 5 MINUTE");
+      const playerTable = req.headers["x-player-table"] as string || "player";
+      const [playerRows]: any = await db.query(`SELECT COUNT(*) as count FROM ${playerTable} WHERE last_play > NOW() - INTERVAL 5 MINUTE`);
       onlinePlayers = playerRows[0]?.count || 0;
       await db.end();
     } catch (dbError: any) {

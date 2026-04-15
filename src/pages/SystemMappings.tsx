@@ -51,10 +51,11 @@ export default function SystemMappings() {
 
   // Default SSH Paths
   const defaultPaths = [
-    { key: "game_dir", label: "Oyun Ana Dizini", default: "/usr/game" },
-    { key: "mysql_dir", label: "MySQL Dizini", default: "/var/db/mysql" },
+    { key: "game_dir", label: "Oyun Ana Dizini (Game)", default: "/usr/game" },
+    { key: "mysql_dir", label: "MySQL Veri Dizini", default: "/var/db/mysql" },
     { key: "quest_dir", label: "Quest Dizini", default: "/usr/game/share/locale/turkey/quest" },
-    { key: "log_dir", label: "Log Dizini", default: "/usr/game/logs" }
+    { key: "log_dir", label: "Log Dizini", default: "/usr/game/share/locale/turkey/log" },
+    { key: "config_dir", label: "Config/Core Dizini", default: "/usr/game/cores" }
   ];
 
   const [mappings, setMappings] = useState<Record<string, string>>({});
@@ -79,7 +80,7 @@ export default function SystemMappings() {
   const saveAll = () => {
     // Save table mappings
     Object.entries(mappings).forEach(([key, value]) => {
-      if (value.trim() !== "") {
+      if (typeof value === "string" && value.trim() !== "") {
         updateTableMapping(key, value);
       }
     });

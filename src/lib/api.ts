@@ -17,8 +17,23 @@ api.interceptors.request.use((config) => {
     config.headers["x-db-name"] = parsed.dbName;
   }
 
-  // Apply table mappings if the request is for /api/db/data or /api/db/query
+  // Include SSH paths
+  const sshPaths = localStorage.getItem("mt2_ssh_paths");
+  if (sshPaths) {
+    const parsedPaths = JSON.parse(sshPaths);
+    if (parsedPaths.game_dir) config.headers["x-game-path"] = parsedPaths.game_dir;
+    if (parsedPaths.mysql_dir) config.headers["x-mysql-path"] = parsedPaths.mysql_dir;
+    if (parsedPaths.log_dir) config.headers["x-log-path"] = parsedPaths.log_dir;
+  }
+
+  // Pass table mappings for stats
   const mappings = localStorage.getItem("mt2_table_mappings");
+  if (mappings) {
+    const parsedMappings = JSON.parse(mappings);
+    if (parsedMappings.player) config.headers["x-player-table"] = parsedMappings.player;
+  }
+
+  // Apply table mappings if the request is for /api/db/data or /api/db/query
   if (mappings && config.url?.includes("/api/db/data")) {
     const parsedMappings = JSON.parse(mappings);
     // Parse URL params
