@@ -23,7 +23,6 @@ const getSSHClient = (headers: any) => {
       password: headers["x-ssh-password"],
       readyTimeout: 60000,
       tryKeyboard: true, // Klavye etkileşimli girişi dene
-      debug: (msg: string) => console.log('SSH DEBUG:', msg)
     };
 
     if (!config.host || !config.username) {
@@ -34,8 +33,7 @@ const getSSHClient = (headers: any) => {
 
     conn
       .on("keyboard-interactive", (name, instructions, instructionsLang, prompts, finish) => {
-        // Sunucu şifre sorduğunda otomatik olarak ş-ifreyi gönder
-        console.log("SSH: Klavye etkileşimli giriş isteği alındı.");
+        // Sunucu şifre sorduğunda otomatik olarak şifreyi gönder
         finish([config.password]);
       })
       .on("ready", () => {
@@ -43,7 +41,7 @@ const getSSHClient = (headers: any) => {
         resolve(conn);
       })
       .on("error", (err: any) => {
-        console.error("SSH KRİTİK HATA:", err);
+        console.error("SSH Hatası:", err.message);
         reject(new Error(`SSH Hatası: ${err.message}`));
       })
       .on("timeout", () => {
