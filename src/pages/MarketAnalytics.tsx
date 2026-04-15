@@ -99,10 +99,10 @@ export default function MarketAnalytics() {
         setOfflineShopSales(mockShopSales);
       }
 
-      // 3. Fetch or Mock Yang Transfers (log.yang_transfer_log)
+      // 3. Fetch or Mock Yang Transfers
       try {
-        const yangTable = tableMappings["exchange_yang"] || "yang_transfer_log";
-        const yangRes = await api.get(`/api/db/data?table=${yangTable}`, { headers: { "x-db-name-override": "log" } });
+        const yangTable = tableMappings["exchange_yang"] || "exchange_yang";
+        const yangRes = await api.get(`/api/db/data?table=${yangTable}`, { headers: { "x-db-name-override": "player" } });
         if (yangRes.data && yangRes.data.length > 0) {
           setYangTransfers(yangRes.data);
         } else {
@@ -399,12 +399,12 @@ export default function MarketAnalytics() {
                     {offlineShopSales.map((sale, i) => (
                       <TableRow key={i}>
                         <TableCell className="text-xs text-muted-foreground font-mono">
-                          {new Date(sale.time).toLocaleString()}
+                          {sale.time ? new Date(sale.time).toLocaleString() : "---"}
                         </TableCell>
-                        <TableCell className="font-bold text-blue-600">{sale.seller_name}</TableCell>
-                        <TableCell className="font-bold text-emerald-600">{sale.buyer_name}</TableCell>
+                        <TableCell className="font-bold text-blue-600">{safeRender(sale.seller_name)}</TableCell>
+                        <TableCell className="font-bold text-emerald-600">{safeRender(sale.buyer_name)}</TableCell>
                         <TableCell className="font-medium">
-                          {ITEM_NAMES[sale.item_vnum] || `Eşya (${sale.item_vnum})`}
+                          {safeRender(ITEM_NAMES[sale.item_vnum] || `Eşya (${sale.item_vnum})`)}
                         </TableCell>
                         <TableCell className="font-mono text-xs">{sale.item_count}</TableCell>
                         <TableCell className="text-right font-mono text-xs font-bold text-amber-600">
@@ -444,13 +444,13 @@ export default function MarketAnalytics() {
                     {yangTransfers.map((transfer, i) => (
                       <TableRow key={i}>
                         <TableCell className="text-xs text-muted-foreground font-mono">
-                          {new Date(transfer.time).toLocaleString()}
+                          {transfer.time ? new Date(transfer.time).toLocaleString() : "---"}
                         </TableCell>
-                        <TableCell className="font-bold text-red-500">{transfer.from_name}</TableCell>
-                        <TableCell className="font-bold text-emerald-500">{transfer.to_name}</TableCell>
+                        <TableCell className="font-bold text-red-500">{safeRender(transfer.from_name)}</TableCell>
+                        <TableCell className="font-bold text-emerald-500">{safeRender(transfer.to_name)}</TableCell>
                         <TableCell>
                           <span className="px-2 py-1 rounded bg-muted text-[10px] font-bold uppercase">
-                            {transfer.reason}
+                            {safeRender(transfer.reason)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs font-bold text-emerald-600">
