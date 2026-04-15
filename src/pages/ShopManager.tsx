@@ -8,18 +8,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
+import { useAppContext } from "../context/AppContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "../components/ui/dialog";
 
 export default function ShopManager() {
+  const { tableMappings } = useAppContext();
   const [shops, setShops] = useState<any[]>([]);
   const [shopItems, setShopItems] = useState<any[]>([]);
   const [selectedShopVnum, setSelectedShopVnum] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [isAddShopOpen, setIsAddShopOpen] = useState(false);
+  const [newShop, setNewShop] = useState({ npc_vnum: "", name: "" });
 
   const fetchShops = async () => {
     setLoading(true);
+    const table = tableMappings["shop"] || "shop";
     try {
-      const res = await api.get("/api/db/data?table=shop", {
+      const res = await api.get(`/api/db/data?table=${table}`, {
         headers: { "x-db-name-override": "player" }
       });
       setShops(res.data);
@@ -32,8 +38,9 @@ export default function ShopManager() {
 
   const fetchShopItems = async (npcVnum: number) => {
     setLoading(true);
+    const table = tableMappings["shop_item"] || "shop_item";
     try {
-      const res = await api.get(`/api/db/data?table=shop_item`, {
+      const res = await api.get(`/api/db/data?table=${table}`, {
         headers: { "x-db-name-override": "player" }
       });
       // Filter items for this specific shop
@@ -63,9 +70,48 @@ export default function ShopManager() {
           <h2 className="text-3xl font-bold tracking-tight">Market Yönetimi</h2>
           <p className="text-muted-foreground">NPC marketlerini ve içerisindeki eşyaları (player.shop / shop_item) yönetin.</p>
         </div>
-        <Button variant="outline" onClick={fetchShops} disabled={loading} className="gap-2">
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchShops} disabled={loading} className="gap-2">
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
+          </Button>
+          <Dialog open={isAddShopOpen} onOpenChange={setIsAddShopOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2"><Plus size={18} /> Yeni Market Ekle</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Yeni Market Tanımla</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">NPC Vnum</label>
+                  <Input 
+                    placeholder="Örn: 9001" 
+                    value={newShop.npc_vnum}
+                    onChange={(e) => setNewShop({...newShop, npc_vnum: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Market Adı (Opsiyonel)</label>
+                  <Input 
+                    placeholder="Örn: Silah Satıcısı" 
+                    value={newShop.name}
+                    onChange={(e) => setNewShop({...newShop, name: e.target.value})}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddShopOpen(false)}>İptal</Button>
+                <Button onClick={async () => {
+                  if (!newShop.npc_vnum) return;
+                  toast.success(`${newShop.npc_vnum} Vnum'lu market eklendi (Simüle edildi)`);
+                  setIsAddShopOpen(false);
+                  setNewShop({ npc_vnum: "", name: "" });
+                }}>Ekle</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

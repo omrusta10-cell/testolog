@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare, Ban, Globe, Gift, Map, Medal, Home, Calendar, Megaphone, ShieldX, Sparkles, ShieldAlert, Ticket, Crown, Navigation, Store, RefreshCw, Server, ShieldAlert as ShieldAlertIcon, FileCode, HardDrive, ArrowRightLeft, MessageCircle, TrendingUp, MapPin, Bug, Wrench, Activity, Shield } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare, Ban, Globe, Gift, Map, Medal, Home, Calendar, Megaphone, ShieldX, Sparkles, ShieldAlert, Ticket, Crown, Navigation, Store, RefreshCw, Server, ShieldAlert as ShieldAlertIcon, FileCode, HardDrive, ArrowRightLeft, MessageCircle, TrendingUp, MapPin, Bug, Wrench, Activity, Shield, Dog, Gem, Gavel, Coins, LayoutGrid, Tag, Swords, Vote, Fish, FileText, Ghost } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster, toast } from "sonner";
@@ -58,6 +58,26 @@ import MaintenanceManager from "./pages/MaintenanceManager";
 import ServerPerformance from "./pages/ServerPerformance";
 import DropManager from "./pages/DropManager";
 import FirewallManager from "./pages/FirewallManager";
+import OfflineShopManager from "./pages/OfflineShopManager";
+import PetManager from "./pages/PetManager";
+import DragonSoulManager from "./pages/DragonSoulManager";
+import MonarchManager from "./pages/MonarchManager";
+import PCBangManager from "./pages/PCBangManager";
+import EmpireChangeManager from "./pages/EmpireChangeManager";
+import YangExchangeManager from "./pages/YangExchangeManager";
+import CardGameManager from "./pages/CardGameManager";
+import LotteryManager from "./pages/LotteryManager";
+import GuildWarManager from "./pages/GuildWarManager";
+import AuctionManager from "./pages/AuctionManager";
+import HorseManager from "./pages/HorseManager";
+import ShopPriceManager from "./pages/ShopPriceManager";
+import HighscoreManager from "./pages/HighscoreManager";
+import GuildMemberManager from "./pages/GuildMemberManager";
+import OfflineShopDetailManager from "./pages/OfflineShopDetailManager";
+import AdvancedLogManager from "./pages/AdvancedLogManager";
+import ProtoEditor from "./pages/ProtoEditor";
+import MobDropManager from "./pages/MobDropManager";
+import SystemLogViewer from "./pages/SystemLogViewer";
 
 import SystemMappings from "./pages/SystemMappings";
 
@@ -117,6 +137,7 @@ const Layout = ({ children, onLogout, isConnected }: { children: React.ReactNode
           <SidebarItem icon={Lock} label={isSidebarOpen ? "Depolar" : ""} to="/safebox" active={location.pathname === "/safebox"} isConnected={isConnected} />
           <SidebarItem icon={UserCircle} label={isSidebarOpen ? "Hesaplar" : ""} to="/accounts" active={location.pathname === "/accounts"} isConnected={isConnected} />
           <SidebarItem icon={Trophy} label={isSidebarOpen ? "Loncalar" : ""} to="/guilds" active={location.pathname === "/guilds"} isConnected={isConnected} />
+          <SidebarItem icon={Crown} label={isSidebarOpen ? "Krallık Sistemi" : ""} to="/monarch" active={location.pathname === "/monarch"} isConnected={isConnected} />
           <SidebarItem icon={Heart} label={isSidebarOpen ? "Evlilikler" : ""} to="/marriages" active={location.pathname === "/marriages"} isConnected={isConnected} />
           <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Arkadaş Listeleri" : ""} to="/messenger" active={location.pathname === "/messenger"} isConnected={isConnected} />
           <SidebarItem icon={Zap} label={isSidebarOpen ? "Aktif Etkiler" : ""} to="/affects" active={location.pathname === "/affects"} isConnected={isConnected} />
@@ -129,19 +150,39 @@ const Layout = ({ children, onLogout, isConnected }: { children: React.ReactNode
           <SidebarItem icon={ShieldX} label={isSidebarOpen ? "IP Engelleme" : ""} to="/ip-bans" active={location.pathname === "/ip-bans"} isConnected={isConnected} />
           <SidebarItem icon={Shield} label={isSidebarOpen ? "Gelişmiş Güvenlik" : ""} to="/firewall" active={location.pathname === "/firewall"} isConnected={isConnected} />
           <SidebarItem icon={ShieldAlert} label={isSidebarOpen ? "Hile Logları" : ""} to="/hack-logs" active={location.pathname === "/hack-logs"} isConnected={isConnected} />
+          <SidebarItem icon={FileText} label={isSidebarOpen ? "Syserr Logları" : ""} to="/system-logs" active={location.pathname === "/system-logs"} isConnected={isConnected} />
+          <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Gelişmiş Loglar" : ""} to="/advanced-logs" active={location.pathname === "/advanced-logs"} isConnected={isConnected} />
           <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Sohbet Geçmişi" : ""} to="/chat-logs" active={location.pathname === "/chat-logs"} isConnected={isConnected} />
           <SidebarItem icon={MessageCircle} label={isSidebarOpen ? "Fısıltı Geçmişi" : ""} to="/whisper-logs" active={location.pathname === "/whisper-logs"} isConnected={isConnected} />
           <SidebarItem icon={ArrowRightLeft} label={isSidebarOpen ? "Ticaret Geçmişi" : ""} to="/trade-logs" active={location.pathname === "/trade-logs"} isConnected={isConnected} />
+          <SidebarItem icon={ArrowRightLeft} label={isSidebarOpen ? "Krallık Değişimleri" : ""} to="/empire-changes" active={location.pathname === "/empire-changes"} isConnected={isConnected} />
+          <SidebarItem icon={Coins} label={isSidebarOpen ? "Yang Transferleri" : ""} to="/yang-exchanges" active={location.pathname === "/yang-exchanges"} isConnected={isConnected} />
+          <SidebarItem icon={Store} label={isSidebarOpen ? "Çevrimdışı Pazarlar" : ""} to="/offline-shops" active={location.pathname === "/offline-shops"} isConnected={isConnected} />
+          <SidebarItem icon={Package} label={isSidebarOpen ? "Pazar Deposu" : ""} to="/offline-shop-details" active={location.pathname === "/offline-shop-details"} isConnected={isConnected} />
+          <SidebarItem icon={Tag} label={isSidebarOpen ? "Pazar Fiyatları" : ""} to="/shop-prices" active={location.pathname === "/shop-prices"} isConnected={isConnected} />
+          <SidebarItem icon={Trophy} label={isSidebarOpen ? "Yüksek Skorlar" : ""} to="/highscores" active={location.pathname === "/highscores"} isConnected={isConnected} />
+          <SidebarItem icon={Dog} label={isSidebarOpen ? "Pet Sistemi" : ""} to="/pets" active={location.pathname === "/pets"} isConnected={isConnected} />
+          <SidebarItem icon={Gem} label={isSidebarOpen ? "Ejderha Taşı" : ""} to="/dragon-soul" active={location.pathname === "/dragon-soul"} isConnected={isConnected} />
           <SidebarItem icon={TrendingUp} label={isSidebarOpen ? "Piyasa Analizi" : ""} to="/market-analytics" active={location.pathname === "/market-analytics"} isConnected={isConnected} />
           <SidebarItem icon={MapPin} label={isSidebarOpen ? "Oyuncu Dağılımı" : ""} to="/map-stats" active={location.pathname === "/map-stats"} isConnected={isConnected} />
+          <SidebarItem icon={LayoutGrid} label={isSidebarOpen ? "Kart Oyunu" : ""} to="/card-game" active={location.pathname === "/card-game"} isConnected={isConnected} />
+          <SidebarItem icon={Ticket} label={isSidebarOpen ? "Piyango (Lotto)" : ""} to="/lottery" active={location.pathname === "/lottery"} isConnected={isConnected} />
           <SidebarItem icon={Ticket} label={isSidebarOpen ? "Hediye Kodları" : ""} to="/coupons" active={location.pathname === "/coupons"} isConnected={isConnected} />
           <SidebarItem icon={Crown} label={isSidebarOpen ? "VIP Oyuncular" : ""} to="/vips" active={location.pathname === "/vips"} isConnected={isConnected} />
           <SidebarItem icon={Zap} label={isSidebarOpen ? "Beceriler" : ""} to="/skills" active={location.pathname === "/skills"} isConnected={isConnected} />
           <SidebarItem icon={RefreshCw} label={isSidebarOpen ? "Yükseltmeler" : ""} to="/refines" active={location.pathname === "/refines"} isConnected={isConnected} />
           <SidebarItem icon={Navigation} label={isSidebarOpen ? "Işınlanma Noktaları" : ""} to="/warps" active={location.pathname === "/warps"} isConnected={isConnected} />
+          <SidebarItem icon={Swords} label={isSidebarOpen ? "Lonca Savaşları" : ""} to="/guild-wars" active={location.pathname === "/guild-wars"} isConnected={isConnected} />
+          <SidebarItem icon={Users} label={isSidebarOpen ? "Lonca Üyeleri" : ""} to="/guild-members" active={location.pathname === "/guild-members"} isConnected={isConnected} />
+          <SidebarItem icon={Gavel} label={isSidebarOpen ? "Müzayedeler" : ""} to="/auctions" active={location.pathname === "/auctions"} isConnected={isConnected} />
+          <SidebarItem icon={Heart} label={isSidebarOpen ? "At Yönetimi" : ""} to="/horses" active={location.pathname === "/horses"} isConnected={isConnected} />
+          <SidebarItem icon={Gift} label={isSidebarOpen ? "Eşya Ödülleri" : ""} to="/item-awards" active={location.pathname === "/item-awards"} isConnected={isConnected} />
           <SidebarItem icon={Sparkles} label={isSidebarOpen ? "Efsun Oranları" : ""} to="/item-attrs" active={location.pathname === "/item-attrs"} isConnected={isConnected} />
+          <SidebarItem icon={FileCode} label={isSidebarOpen ? "Proto Editörü" : ""} to="/proto-editor" active={location.pathname === "/proto-editor"} isConnected={isConnected} />
+          <SidebarItem icon={Ghost} label={isSidebarOpen ? "Drop Yönetimi" : ""} to="/mob-drops" active={location.pathname === "/mob-drops"} isConnected={isConnected} />
           <SidebarItem icon={Ban} label={isSidebarOpen ? "Yasaklı Kelimeler" : ""} to="/banwords" active={location.pathname === "/banwords"} isConnected={isConnected} />
           <SidebarItem icon={Globe} label={isSidebarOpen ? "Sunucu Oranları" : ""} to="/privs" active={location.pathname === "/privs"} isConnected={isConnected} />
+          <SidebarItem icon={MapPin} label={isSidebarOpen ? "PC Bang IP" : ""} to="/pcbang" active={location.pathname === "/pcbang"} isConnected={isConnected} />
           <SidebarItem icon={Server} label={isSidebarOpen ? "Sunucu Kontrol" : ""} to="/server-control" active={location.pathname === "/server-control"} isConnected={isConnected} />
           <SidebarItem icon={Activity} label={isSidebarOpen ? "Performans Monitörü" : ""} to="/performance" active={location.pathname === "/performance"} isConnected={isConnected} />
           <SidebarItem icon={Bug} label={isSidebarOpen ? "Core Analizi (GDB)" : ""} to="/core-crash" active={location.pathname === "/core-crash"} isConnected={isConnected} />
@@ -238,6 +279,28 @@ const MainApp = () => {
               <Route path="/chat-logs" element={<ChatLogManager />} />
               <Route path="/whisper-logs" element={<WhisperLogManager />} />
               <Route path="/trade-logs" element={<TradeLogManager />} />
+              <Route path="/offline-shops" element={<OfflineShopManager />} />
+              <Route path="/pets" element={<PetManager />} />
+              <Route path="/dragon-soul" element={<DragonSoulManager />} />
+              <Route path="/monarch" element={<MonarchManager />} />
+              <Route path="/pcbang" element={<PCBangManager />} />
+              <Route path="/empire-changes" element={<EmpireChangeManager />} />
+              <Route path="/yang-exchanges" element={<YangExchangeManager />} />
+              <Route path="/card-game" element={<CardGameManager />} />
+              <Route path="/lottery" element={<LotteryManager />} />
+              <Route path="/guild-wars" element={<GuildWarManager />} />
+              <Route path="/auctions" element={<AuctionManager />} />
+              <Route path="/horses" element={<HorseManager />} />
+              <Route path="/item-awards" element={<ItemAwardManager />} />
+              <Route path="/shop-prices" element={<ShopPriceManager />} />
+              <Route path="/highscores" element={<HighscoreManager />} />
+              <Route path="/guild-members" element={<GuildMemberManager />} />
+              <Route path="/offline-shop-details" element={<OfflineShopDetailManager />} />
+              <Route path="/advanced-logs" element={<AdvancedLogManager />} />
+              <Route path="/proto-editor" element={<ProtoEditor />} />
+              <Route path="/mob-drops" element={<MobDropManager />} />
+              <Route path="/system-logs" element={<SystemLogViewer />} />
+              <Route path="/pcbang" element={<PCBangManager />} />
               <Route path="/market-analytics" element={<MarketAnalytics />} />
               <Route path="/map-stats" element={<MapStatistics />} />
               <Route path="/coupons" element={<CouponManager />} />

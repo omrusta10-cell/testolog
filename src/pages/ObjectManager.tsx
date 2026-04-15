@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function ObjectManager() {
+  const { tableMappings } = useAppContext();
   const [objects, setObjects] = useState<any[]>([]);
   const [lands, setLands] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -17,11 +19,14 @@ export default function ObjectManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const objRes = await api.get("/api/db/data?table=object", {
+      const objectTable = tableMappings["object"] || "object";
+      const landTable = tableMappings["land"] || "land";
+
+      const objRes = await api.get(`/api/db/data?table=${objectTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
-      const landRes = await api.get("/api/db/data?table=land", {
+      const landRes = await api.get(`/api/db/data?table=${landTable}`, {
         headers: { "x-db-name-override": "player" }
       });
 

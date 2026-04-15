@@ -8,16 +8,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES } from "../lib/mappings";
+import { useAppContext } from "../context/AppContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "../components/ui/dialog";
 
 export default function RefineManager() {
+  const { tableMappings } = useAppContext();
   const [refines, setRefines] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [editingRefine, setEditingRefine] = useState<any | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
+    const table = tableMappings["refine"] || "refine_proto";
     try {
-      const res = await api.get("/api/db/data?table=refine_proto", {
+      const res = await api.get(`/api/db/data?table=${table}`, {
         headers: { "x-db-name-override": "player" }
       });
       setRefines(res.data);

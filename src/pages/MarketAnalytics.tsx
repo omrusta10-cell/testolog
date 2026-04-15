@@ -10,8 +10,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES } from "../lib/mappings";
+import { useAppContext } from "../context/AppContext";
 
 export default function MarketAnalytics() {
+  const { tableMappings } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -40,12 +42,13 @@ export default function MarketAnalytics() {
     setLoading(true);
     try {
       // 1. Fetch Item Proto for base items to analyze
-      const itemRes = await api.get("/api/db/data?table=item_proto", {
+      const itemTable = tableMappings["item_proto"] || "item_proto";
+      const itemRes = await api.get(`/api/db/data?table=${itemTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
       // Generate realistic market analysis data
-      const analysisData = itemRes.data.slice(0, 100).map((item: any) => {
+      const analysisData = itemRes.data.map((item: any) => {
         const vnum = item.vnum || item.id;
         const name = ITEM_NAMES[vnum] || item.locale_name || `Eşya (${vnum})`;
         const isRare = Math.random() > 0.85;
@@ -74,7 +77,8 @@ export default function MarketAnalytics() {
 
       // 2. Fetch or Mock Offline Shop Sales (log.offline_shop_sale)
       try {
-        const shopRes = await api.get("/api/db/data?table=offline_shop_sale", { headers: { "x-db-name-override": "log" } });
+        const salesTable = tableMappings["offlineshop_sales"] || "offline_shop_sales";
+        const shopRes = await api.get(`/api/db/data?table=${salesTable}`, { headers: { "x-db-name-override": "player" } });
         if (shopRes.data && shopRes.data.length > 0) {
           setOfflineShopSales(shopRes.data);
         } else {

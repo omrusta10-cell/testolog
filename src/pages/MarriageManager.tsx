@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function MarriageManager() {
+  const { tableMappings } = useAppContext();
   const [marriages, setMarriages] = useState<any[]>([]);
   const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -17,13 +19,16 @@ export default function MarriageManager() {
   const fetchMarriagesAndPlayers = async () => {
     setLoading(true);
     try {
+      const marriageTable = tableMappings["marriage"] || "marriage";
+      const playerTable = tableMappings["player"] || "player";
+
       // Fetch marriages
-      const mRes = await api.get("/api/db/data?table=marriage", {
+      const mRes = await api.get(`/api/db/data?table=${marriageTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
       // Fetch players for mapping
-      const playerRes = await api.get("/api/db/data?table=player", {
+      const playerRes = await api.get(`/api/db/data?table=${playerTable}`, {
         headers: { "x-db-name-override": "player" }
       });
 

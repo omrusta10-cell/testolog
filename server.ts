@@ -225,7 +225,7 @@ app.get("/api/db/data", async (req, res) => {
   if (!table) return res.status(400).json({ error: "Table required" });
   try {
     const db = await getDbConnection(req.headers);
-    const [rows] = await db.query(`SELECT * FROM ${table} LIMIT 100`);
+    const [rows] = await db.query(`SELECT * FROM ${table}`);
     await db.end();
     res.json(rows);
   } catch (error: any) {
@@ -253,6 +253,8 @@ app.get("/api/stats", async (req, res) => {
   try {
     let rawStats = "";
     let onlinePlayers = 0;
+    let offlineShops = 0;
+    let totalPets = 0;
     let status = "Aktif";
 
     try {
@@ -281,6 +283,21 @@ app.get("/api/stats", async (req, res) => {
       const playerTable = req.headers["x-player-table"] as string || "player";
       const [playerRows]: any = await db.query(`SELECT COUNT(*) as count FROM ${playerTable} WHERE last_play > NOW() - INTERVAL 5 MINUTE`);
       onlinePlayers = playerRows[0]?.count || 0;
+
+      // Fetch Offline Shops Count
+      try {
+        const shopTable = req.headers["x-offlineshop-table"] as string || "offlineshop_shops";
+        const [shopRows]: any = await db.query(`SELECT COUNT(*) as count FROM ${shopTable}`);
+        offlineShops = shopRows[0]?.count || 0;
+      } catch (e) {}
+
+      // Fetch Pets Count
+      try {
+        const petTable = req.headers["x-petsystem-table"] as string || "new_petsystem";
+        const [petRows]: any = await db.query(`SELECT COUNT(*) as count FROM ${petTable}`);
+        totalPets = petRows[0]?.count || 0;
+      } catch (e) {}
+
       await db.end();
     } catch (dbError: any) {
       console.error("Stats DB Error:", dbError.message);
@@ -295,6 +312,8 @@ app.get("/api/stats", async (req, res) => {
     
     res.json({
       onlinePlayers: onlinePlayers,
+      offlineShops: offlineShops,
+      totalPets: totalPets,
       cpuUsage: cpuUsage,
       diskUsage: rawStats.includes("/") ? rawStats.split(/\s+/).filter(Boolean)[2] + " / " + rawStats.split(/\s+/).filter(Boolean)[1] : (rawStats ? "42 GB" : "Bilinmiyor"),
       ramUsage: rawStats ? "Aktif" : "Bilinmiyor", // Simplified for now

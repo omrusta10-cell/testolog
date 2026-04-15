@@ -28,10 +28,10 @@ export default function RankingManager() {
       const sortedPlayers = [...pRes.data].sort((a, b) => {
         if (b.level !== a.level) return b.level - a.level;
         return b.exp - a.exp;
-      }).slice(0, 50);
+      });
 
       // Sort guilds by ladder_point
-      const sortedGuilds = [...gRes.data].sort((a, b) => b.ladder_point - a.ladder_point).slice(0, 50);
+      const sortedGuilds = [...gRes.data].sort((a, b) => b.ladder_point - a.ladder_point);
 
       setPlayers(sortedPlayers);
       setGuilds(sortedGuilds);
@@ -82,7 +82,7 @@ export default function RankingManager() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {activeTab === "players" ? <Medal className="text-amber-500" size={20} /> : <Trophy className="text-blue-500" size={20} />}
-            {activeTab === "players" ? "En İyi 50 Oyuncu" : "En İyi 50 Lonca"}
+            {activeTab === "players" ? "Tüm Oyuncu Sıralaması" : "Tüm Lonca Sıralaması"}
           </CardTitle>
           <CardDescription>
             {activeTab === "players" ? "Level ve tecrübe puanına göre sıralanmıştır." : "Lonca puanına (ladder_point) göre sıralanmıştır."}

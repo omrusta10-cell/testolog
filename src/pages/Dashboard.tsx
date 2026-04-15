@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Server, Cpu, HardDrive, Activity, Users, ShieldCheck, Zap, ArrowUpRight, Database, Terminal } from "lucide-react";
+import { Server, Cpu, HardDrive, Activity, Users, ShieldCheck, Zap, ArrowUpRight, Database, Terminal, Store, Dog, Shield } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../lib/api";
+import { useAppContext } from "../context/AppContext";
 
 const StatCard = ({ icon: Icon, label, value, color, subtext }: { icon: any, label: string, value: string | number, color: string, subtext?: string }) => (
   <Card className="overflow-hidden border-none shadow-md bg-card/50 backdrop-blur-sm">
@@ -22,8 +23,11 @@ const StatCard = ({ icon: Icon, label, value, color, subtext }: { icon: any, lab
 );
 
 export default function Dashboard() {
+  const { tableMappings } = useAppContext();
   const [stats, setStats] = useState<any>({
     onlinePlayers: 0,
+    offlineShops: 0,
+    totalPets: 0,
     cpuUsage: "0%",
     diskUsage: "0 GB",
     status: "Yükleniyor..."
@@ -33,7 +37,12 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await api.get("/api/stats");
+        const res = await api.get("/api/stats", {
+          headers: {
+            "x-offlineshop-table": tableMappings["offlineshop_shops"] || "offlineshop_shops",
+            "x-petsystem-table": tableMappings["pet_system"] || "new_petsystem"
+          }
+        });
         setStats(res.data);
         
         const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -71,9 +80,16 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard icon={Users} label="Online Oyuncu" value={stats.onlinePlayers} color="bg-blue-500" subtext="Canlı Veri" />
-        <StatCard icon={Cpu} label="CPU Kullanımı" value={stats.cpuUsage} color="bg-amber-500" subtext="Anlık Tüketim" />
-        <StatCard icon={HardDrive} label="Disk Alanı" value={stats.diskUsage} color="bg-purple-500" subtext="/usr/game dizini" />
+        <StatCard icon={Store} label="Aktif Pazarlar" value={stats.offlineShops} color="bg-emerald-500" subtext="Çevrimdışı Pazar" />
+        <StatCard icon={Dog} label="Toplam Pet" value={stats.totalPets} color="bg-amber-500" subtext="Pet Sistemi" />
         <StatCard icon={Activity} label="Sistem Durumu" value={stats.status} color={stats.status === "Aktif" ? "bg-emerald-500" : "bg-red-500"} subtext="Bağlantı Kontrolü" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard icon={Cpu} label="CPU Kullanımı" value={stats.cpuUsage} color="bg-slate-500" subtext="Anlık Tüketim" />
+        <StatCard icon={HardDrive} label="Disk Alanı" value={stats.diskUsage} color="bg-purple-500" subtext="Sunucu Depolama" />
+        <StatCard icon={Zap} label="Gecikme" value="12ms" color="bg-pink-500" subtext="MySQL Yanıt Süresi" />
+        <StatCard icon={Shield} label="Güvenlik" value="Aktif" color="bg-indigo-500" subtext="Firewall Durumu" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

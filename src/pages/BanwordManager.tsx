@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function BanwordManager() {
+  const { tableMappings } = useAppContext();
   const [words, setWords] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -16,7 +18,8 @@ export default function BanwordManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=banword", {
+      const banwordTable = tableMappings["banword"] || "banword";
+      const res = await api.get(`/api/db/data?table=${banwordTable}`, {
         headers: { "x-db-name-override": "common" }
       });
       setWords(res.data);

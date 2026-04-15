@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Gift, Search, RefreshCw, Trash2, Info, User, Package } from "lucide-react";
+import { Gavel, Search, RefreshCw, Trash2, Info, User, Clock, Coins } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -10,28 +10,28 @@ import api from "../lib/api";
 import { toast } from "sonner";
 import { useAppContext } from "../context/AppContext";
 
-export default function ItemAwardManager() {
+export default function AuctionManager() {
   const { tableMappings } = useAppContext();
-  const [awards, setAwards] = useState<any[]>([]);
-  const [oldAwards, setOldAwards] = useState<any[]>([]);
+  const [auctions, setAuctions] = useState<any[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const awardTable = tableMappings["item_award"] || "item_award";
-      const oldAwardTable = tableMappings["item_award_old"] || "item_award_old";
+      const auctionTable = tableMappings["offlineshop_auctions"] || "offlineshop_auctions";
+      const offerTable = tableMappings["offlineshop_auction_offers"] || "offlineshop_auction_offers";
 
-      const [awardRes, oldAwardRes] = await Promise.all([
-        api.get(`/api/db/data?table=${awardTable}`, { headers: { "x-db-name-override": "player" } }),
-        api.get(`/api/db/data?table=${oldAwardTable}`, { headers: { "x-db-name-override": "player" } })
+      const [aucRes, offRes] = await Promise.all([
+        api.get(`/api/db/data?table=${auctionTable}`, { headers: { "x-db-name-override": "player" } }),
+        api.get(`/api/db/data?table=${offerTable}`, { headers: { "x-db-name-override": "player" } })
       ]);
 
-      setAwards(awardRes.data);
-      setOldAwards(oldAwardRes.data);
+      setAuctions(aucRes.data);
+      setOffers(offRes.data);
     } catch (err: any) {
-      toast.error("Ödül verileri yüklenemedi: " + err.message);
+      toast.error("Açık artırma verileri yüklenemedi: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -45,51 +45,51 @@ export default function ItemAwardManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Eşya Ödülleri Yönetimi</h2>
-          <p className="text-muted-foreground">Nesne market veya sistem tarafından verilen eşya ödüllerini yönetin.</p>
+          <h2 className="text-3xl font-bold tracking-tight">Açık Artırma Yönetimi</h2>
+          <p className="text-muted-foreground">Çevrimdışı pazar açık artırmalarını ve teklifleri yönetin.</p>
         </div>
         <Button variant="outline" onClick={fetchData} disabled={loading} className="gap-2">
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
         </Button>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="auctions" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="active" className="gap-2"><Gift size={16} /> Bekleyen Ödüller</TabsTrigger>
-          <TabsTrigger value="history" className="gap-2"><Package size={16} /> Geçmiş Ödüller</TabsTrigger>
+          <TabsTrigger value="auctions" className="gap-2"><Gavel size={16} /> Aktif Müzayedeler</TabsTrigger>
+          <TabsTrigger value="offers" className="gap-2"><Coins size={16} /> Verilen Teklifler</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="mt-4">
+        <TabsContent value="auctions" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Bekleyen Ödüller</CardTitle>
-              <CardDescription>Oyuncuların henüz teslim almadığı eşyalar.</CardDescription>
+              <CardTitle>Müzayede Listesi</CardTitle>
+              <CardDescription>Sistemdeki aktif açık artırmalar.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Hesap (Login)</TableHead>
-                    <TableHead>Vnum</TableHead>
-                    <TableHead>Adet</TableHead>
-                    <TableHead>Veriliş Nedeni</TableHead>
+                    <TableHead>Sahibi (PID)</TableHead>
+                    <TableHead>Eşya ID</TableHead>
+                    <TableHead>Başlangıç Fiyatı</TableHead>
+                    <TableHead>Bitiş Zamanı</TableHead>
                     <TableHead className="text-right">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {awards.length === 0 ? (
+                  {auctions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Bekleyen ödül bulunamadı.</TableCell>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Müzayede bulunamadı.</TableCell>
                     </TableRow>
                   ) : (
-                    awards.map((a, idx) => (
+                    auctions.map((a, idx) => (
                       <TableRow key={idx}>
                         <TableCell className="font-mono">{a.id}</TableCell>
-                        <TableCell>{a.login}</TableCell>
-                        <TableCell>{a.vnum}</TableCell>
-                        <TableCell>{a.count}</TableCell>
-                        <TableCell>{a.why || "-"}</TableCell>
+                        <TableCell>{a.owner_id}</TableCell>
+                        <TableCell>{a.item_id}</TableCell>
+                        <TableCell className="text-amber-500 font-bold">{Number(a.start_price).toLocaleString()} Yang</TableCell>
+                        <TableCell>{a.finish_time}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="text-destructive"><Trash2 size={18} /></Button>
                         </TableCell>
@@ -102,35 +102,33 @@ export default function ItemAwardManager() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="history" className="mt-4">
+        <TabsContent value="offers" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Ödül Geçmişi</CardTitle>
-              <CardDescription>Teslim edilmiş veya süresi geçmiş ödüller.</CardDescription>
+              <CardTitle>Teklif Geçmişi</CardTitle>
+              <CardDescription>Müzayedelere verilen tüm teklifler.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Hesap (Login)</TableHead>
-                    <TableHead>Vnum</TableHead>
-                    <TableHead>Teslim Tarihi</TableHead>
+                    <TableHead>Müzayede ID</TableHead>
+                    <TableHead>Teklif Veren (PID)</TableHead>
+                    <TableHead>Miktar</TableHead>
                     <TableHead className="text-right">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {oldAwards.length === 0 ? (
+                  {offers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Geçmiş kaydı bulunamadı.</TableCell>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Teklif bulunamadı.</TableCell>
                     </TableRow>
                   ) : (
-                    oldAwards.map((a, idx) => (
+                    offers.map((o, idx) => (
                       <TableRow key={idx}>
-                        <TableCell className="font-mono">{a.id}</TableCell>
-                        <TableCell>{a.login}</TableCell>
-                        <TableCell>{a.vnum}</TableCell>
-                        <TableCell>{a.mall_deliver_time}</TableCell>
+                        <TableCell className="font-mono">{o.auction_id}</TableCell>
+                        <TableCell>{o.buyer_id}</TableCell>
+                        <TableCell className="text-emerald-500 font-bold">{Number(o.price).toLocaleString()} Yang</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="text-destructive"><Trash2 size={18} /></Button>
                         </TableCell>

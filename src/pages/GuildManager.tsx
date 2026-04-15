@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function GuildManager() {
+  const { tableMappings } = useAppContext();
   const [guilds, setGuilds] = useState<any[]>([]);
   const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -17,13 +19,16 @@ export default function GuildManager() {
   const fetchGuildsAndPlayers = async () => {
     setLoading(true);
     try {
+      const guildTable = tableMappings["guild"] || "guild";
+      const playerTable = tableMappings["player"] || "player";
+
       // Fetch guilds
-      const guildRes = await api.get("/api/db/data?table=guild", {
+      const guildRes = await api.get(`/api/db/data?table=${guildTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
       // Fetch players for mapping leader names
-      const playerRes = await api.get("/api/db/data?table=player", {
+      const playerRes = await api.get(`/api/db/data?table=${playerTable}`, {
         headers: { "x-db-name-override": "player" }
       });
 

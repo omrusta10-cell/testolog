@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function LandManager() {
+  const { tableMappings } = useAppContext();
   const [lands, setLands] = useState<any[]>([]);
   const [guilds, setGuilds] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -17,11 +19,14 @@ export default function LandManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const landRes = await api.get("/api/db/data?table=land", {
+      const landTable = tableMappings["land"] || "land";
+      const guildTable = tableMappings["guild"] || "guild";
+
+      const landRes = await api.get(`/api/db/data?table=${landTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
-      const guildRes = await api.get("/api/db/data?table=guild", {
+      const guildRes = await api.get(`/api/db/data?table=${guildTable}`, {
         headers: { "x-db-name-override": "player" }
       });
 

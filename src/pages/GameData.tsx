@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import api from "../lib/api";
 import { toast } from "sonner";
 import { ITEM_NAMES, MOB_NAMES } from "../lib/mappings";
+import { useAppContext } from "../context/AppContext";
 
 export default function GameData() {
+  const { tableMappings } = useAppContext();
   const [activeTab, setActiveTab] = useState<"items" | "mobs" | "skills" | "refine">("items");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -17,13 +19,15 @@ export default function GameData() {
 
   const fetchData = async (tab: "items" | "mobs" | "skills" | "refine") => {
     setLoading(true);
-    let table = "";
+    let tableKey = "";
     switch(tab) {
-      case "items": table = "item_proto"; break;
-      case "mobs": table = "mob_proto"; break;
-      case "skills": table = "skill_proto"; break;
-      case "refine": table = "refine_proto"; break;
+      case "items": tableKey = "item_proto"; break;
+      case "mobs": tableKey = "mob_proto"; break;
+      case "skills": tableKey = "skill_proto"; break;
+      case "refine": tableKey = "refine_proto"; break;
     }
+    
+    const table = tableMappings[tableKey] || tableKey;
     
     try {
       const res = await api.get(`/api/db/data?table=${table}`, {

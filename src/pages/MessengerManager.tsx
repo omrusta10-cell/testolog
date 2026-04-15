@@ -7,8 +7,10 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function MessengerManager() {
+  const { tableMappings } = useAppContext();
   const [list, setList] = useState<any[]>([]);
   const [players, setPlayers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -17,11 +19,14 @@ export default function MessengerManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/db/data?table=messenger_list", {
+      const messengerTable = tableMappings["messenger_list"] || "messenger_list";
+      const playerTable = tableMappings["player"] || "player";
+
+      const res = await api.get(`/api/db/data?table=${messengerTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
-      const playerRes = await api.get("/api/db/data?table=player", {
+      const playerRes = await api.get(`/api/db/data?table=${playerTable}`, {
         headers: { "x-db-name-override": "player" }
       });
 
