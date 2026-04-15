@@ -28,16 +28,10 @@ const getSSHClient = (headers: any) => {
       // Eski FreeBSD sürümleri için algoritma desteğini genişletiyoruz
       algorithms: {
         kex: [
-          "diffie-hellman-group1-sha1",
           "diffie-hellman-group14-sha1",
-          "diffie-hellman-group-exchange-sha1",
           "diffie-hellman-group-exchange-sha256",
-          "ecdh-sha2-nistp256",
-          "ecdh-sha2-nistp384",
-          "ecdh-sha2-nistp521",
-          "curve25519-sha256-libssh2.org",
-          "curve25519-sha256@libssh2.org",
-          "curve25519-sha256"
+          "diffie-hellman-group-exchange-sha1",
+          "diffie-hellman-group1-sha1"
         ],
         cipher: [
           "aes128-ctr", "aes192-ctr", "aes256-ctr",
@@ -46,8 +40,7 @@ const getSSHClient = (headers: any) => {
           "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"
         ],
         serverHostKey: [
-          "ssh-rsa", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521",
-          "ssh-ed25519"
+          "ssh-rsa", "ssh-dss"
         ]
       }
     };
