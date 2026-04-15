@@ -22,7 +22,8 @@ const getSSHClient = (headers: any) => {
       username: headers["x-ssh-user"],
       password: headers["x-ssh-password"],
       readyTimeout: 60000,
-      debug: (msg: string) => console.log('SSH DEBUG:', msg) // Terminale detaylı log basar
+      tryKeyboard: true, // Klavye etkileşimli girişi dene
+      debug: (msg: string) => console.log('SSH DEBUG:', msg)
     };
 
     if (!config.host || !config.username) {
@@ -32,6 +33,11 @@ const getSSHClient = (headers: any) => {
     console.log(`SSH Bağlantısı deneniyor: ${config.host}:${config.port}`);
 
     conn
+      .on("keyboard-interactive", (name, instructions, instructionsLang, prompts, finish) => {
+        // Sunucu şifre sorduğunda otomatik olarak ş-ifreyi gönder
+        console.log("SSH: Klavye etkileşimli giriş isteği alındı.");
+        finish([config.password]);
+      })
       .on("ready", () => {
         console.log("SSH Bağlantısı Başarılı!");
         resolve(conn);
