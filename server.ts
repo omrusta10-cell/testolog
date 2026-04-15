@@ -207,6 +207,29 @@ app.post("/api/exec", async (req, res) => {
   }
 });
 
+// Console Command Alias
+app.post("/api/console/command", async (req, res) => {
+  const { command } = req.body;
+  try {
+    const conn = await getSSHClient(req.headers);
+    conn.exec(command, (err, stream) => {
+      if (err) throw err;
+      let output = "";
+      let errorOutput = "";
+      stream.on("close", (code: number) => {
+        conn.end();
+        res.json({ output, errorOutput, code });
+      }).on("data", (data: any) => {
+        output += data;
+      }).stderr.on("data", (data) => {
+        errorOutput += data;
+      });
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Database: List Tables
 app.get("/api/db/tables", async (req, res) => {
   try {

@@ -68,7 +68,7 @@ export default function ProtoEditor() {
   };
 
   const filteredData = data.filter(item => 
-    (item.locale_name || item.name || item.dwName || "").toLowerCase().includes(search.toLowerCase()) || 
+    (String(item.locale_name || item.name || item.dwName || "")).toLowerCase().includes(search.toLowerCase()) || 
     String(item.vnum).includes(search)
   );
 

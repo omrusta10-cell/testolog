@@ -61,7 +61,9 @@ export default function PCBangManager() {
           </Button>
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2"><Plus size={18} /> Yeni IP Ekle</Button>
+              <div className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground h-8 gap-1.5 px-2.5 text-sm font-medium cursor-pointer hover:bg-primary/80">
+                <Plus size={18} /> Yeni IP Ekle
+              </div>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>

@@ -59,6 +59,7 @@ export default function OfflineShopManager() {
   }, []);
 
   const formatYang = (val: number) => {
+    if (val === undefined || val === null) return "0";
     if (val >= 1000000000) return (val / 1000000000).toFixed(2) + "T";
     if (val >= 1000000) return (val / 1000000).toFixed(2) + "M";
     if (val >= 1000) return (val / 1000).toFixed(2) + "K";
@@ -207,7 +208,9 @@ export default function OfflineShopManager() {
                   <TableBody>
                     {sales.map((sale, i) => (
                       <TableRow key={i}>
-                        <TableCell className="text-xs text-muted-foreground font-mono">{new Date(sale.time).toLocaleString()}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground font-mono">
+                          {sale.time ? new Date(sale.time).toLocaleString() : "---"}
+                        </TableCell>
                         <TableCell className="font-bold text-blue-600">{sale.seller_name}</TableCell>
                         <TableCell className="font-bold text-emerald-600">{sale.buyer_name}</TableCell>
                         <TableCell className="font-medium">{ITEM_NAMES[sale.item_vnum] || `Eşya (${sale.item_vnum})`}</TableCell>
