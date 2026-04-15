@@ -16,35 +16,60 @@ app.use(express.json());
 const getSSHClient = (headers: any) => {
   return new Promise<Client>((resolve, reject) => {
     const conn = new Client();
-    const config = {
+    const config: any = {
       host: headers["x-ssh-host"],
       port: parseInt(headers["x-ssh-port"] || "22"),
       username: headers["x-ssh-user"],
       password: headers["x-ssh-password"],
       tryKeyboard: true,
-      readyTimeout: 40000, // Increase timeout to 40 seconds
+      readyTimeout: 60000, // 60 saniye
       keepaliveInterval: 10000,
       keepaliveCountMax: 3,
+      // Eski FreeBSD sürümleri için algoritma desteğini genişletiyoruz
+      algorithms: {
+        kex: [
+          "diffie-hellman-group1-sha1",
+          "diffie-hellman-group14-sha1",
+          "diffie-hellman-group-exchange-sha1",
+          "diffie-hellman-group-exchange-sha256",
+          "ecdh-sha2-nistp256",
+          "ecdh-sha2-nistp384",
+          "ecdh-sha2-nistp521",
+          "curve25519-sha256-libssh2.org",
+          "curve25519-sha256@libssh2.org",
+          "curve25519-sha256"
+        ],
+        cipher: [
+          "aes128-ctr", "aes192-ctr", "aes256-ctr",
+          "aes128-gcm", "aes128-gcm@openssh.com",
+          "aes256-gcm", "aes256-gcm@openssh.com",
+          "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"
+        ],
+        serverHostKey: [
+          "ssh-rsa", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521",
+          "ssh-ed25519"
+        ]
+      }
     };
 
     if (!config.host || !config.username) {
-      return reject(new Error("SSH credentials missing in headers"));
+      return reject(new Error("SSH bilgileri eksik."));
     }
 
-    console.log(`Attempting SSH connection to ${config.host}:${config.port}...`);
+    console.log(`SSH Bağlantısı deneniyor: ${config.host}:${config.port} (Kullanıcı: ${config.username})`);
 
     conn
       .on("ready", () => {
-        console.log("SSH Connection Ready");
+        console.log("SSH Bağlantısı Başarılı!");
         resolve(conn);
       })
       .on("error", (err: any) => {
-        console.error("SSH Connection Error:", err.message);
-        if (err.message.includes("Timed out while waiting for handshake")) {
-          reject(new Error("SSH Bağlantı Zaman Aşımı: Sunucuya ulaşılamıyor. Lütfen IP/Port bilgilerini kontrol edin, sunucu güvenlik duvarının (firewall) dış bağlantılara izin verdiğinden emin olun veya yerel bir IP (192.168.x.x) kullanmadığınızı doğrulayın."));
-        } else {
-          reject(err);
+        console.error("SSH Hatası Detayı:", err);
+        let customMsg = `SSH Hatası: ${err.message}`;
+        if (err.code === "ETIMEDOUT" || err.message.includes("handshake")) {
+          customMsg = "SSH Bağlantı Zaman Aşımı: Sunucuya ulaşılamıyor veya el sıkışma (handshake) başarısız oldu. Lütfen Windows Güvenlik Duvarı'nı kapatıp tekrar deneyin.";
         }
+        reject(new Error(customMsg));
       })
       .on("timeout", () => {
         console.error("SSH Connection Timeout");
