@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Server, Cpu, HardDrive, Activity, Users, ShieldCheck, Zap, ArrowUpRight, Database, Terminal, Store, Dog, Shield } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -6,20 +8,19 @@ import api from "../lib/api";
 import { useAppContext } from "../context/AppContext";
 
 const StatCard = ({ icon: Icon, label, value, color, subtext }: { icon: any, label: string, value: string | number, color: string, subtext?: string }) => (
-  <Card className="overflow-hidden border-none shadow-md bg-card/50 backdrop-blur-sm">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-          <h3 className="text-3xl font-bold mt-1">{value}</h3>
-          {subtext && <p className="text-xs text-muted-foreground mt-1">{subtext}</p>}
-        </div>
-        <div className={`p-3 rounded-2xl ${color}`}>
-          <Icon size={24} className="text-white" />
-        </div>
+  <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 group hover:border-white/20 transition-all duration-300">
+    <div className="flex justify-between items-start">
+      <div className={`p-3 rounded-xl bg-white/5 ${color} transition-colors duration-300`}>
+        <Icon size={24} />
       </div>
-    </CardContent>
-  </Card>
+      <ArrowUpRight size={16} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+    </div>
+    <div>
+      <p className="text-neutral-500 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</p>
+      <h3 className="text-2xl font-headline font-bold text-white tracking-tight">{value}</h3>
+      {subtext && <p className="text-[10px] text-neutral-600 uppercase tracking-widest mt-1">{subtext}</p>}
+    </div>
+  </div>
 );
 
 export default function Dashboard() {
@@ -58,95 +59,178 @@ export default function Dashboard() {
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 5000); // 5 saniyede bir güncelle
+    const interval = setInterval(fetchStats, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [tableMappings]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-[1600px] mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Sunucu durumuna ve hızlı istatistiklere göz atın.</p>
+          <h1 className="text-4xl font-headline font-bold text-white tracking-tighter uppercase neon-glow-primary">SYSTEM_OVERVIEW</h1>
+          <p className="text-neutral-500 text-xs uppercase tracking-[0.3em] mt-2">Real-time server monitoring & management</p>
         </div>
-        <div className="flex items-center gap-2 text-sm bg-card px-4 py-2 rounded-full border shadow-sm">
-          <span className="relative flex h-3 w-3">
+        <div className="flex items-center gap-3 glass-panel px-4 py-2 rounded-xl border-white/5">
+          <div className="relative flex h-2 w-2">
             <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${stats.status === "Aktif" ? "bg-emerald-400" : "bg-red-400"}`}></span>
-            <span className={`relative inline-flex rounded-full h-3 w-3 ${stats.status === "Aktif" ? "bg-emerald-500" : "bg-red-500"}`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${stats.status === "Aktif" ? "bg-emerald-500" : "bg-red-500"}`}></span>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+            CORE_STATUS: <span className={stats.status === "Aktif" ? "text-emerald-400" : "text-red-400"}>{stats.status.toUpperCase()}</span>
           </span>
-          <span className="text-muted-foreground font-medium">Sunucu: <strong className={stats.status === "Aktif" ? "text-emerald-500" : "text-red-500"}>{stats.status}</strong></span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={Users} label="Online Oyuncu" value={stats.onlinePlayers} color="bg-blue-500" subtext="Canlı Veri" />
-        <StatCard icon={Store} label="Aktif Pazarlar" value={stats.offlineShops} color="bg-emerald-500" subtext="Çevrimdışı Pazar" />
-        <StatCard icon={Dog} label="Toplam Pet" value={stats.totalPets} color="bg-amber-500" subtext="Pet Sistemi" />
-        <StatCard icon={Activity} label="Sistem Durumu" value={stats.status} color={stats.status === "Aktif" ? "bg-emerald-500" : "bg-red-500"} subtext="Bağlantı Kontrolü" />
-      </div>
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Main Status Card */}
+        <div className="md:col-span-8 glass-panel p-8 rounded-3xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Server size={120} className="text-blue-400" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-blue-400 font-headline text-xs font-bold uppercase tracking-widest mb-6">SYSTEM_CORE_01</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div>
+                <p className="text-neutral-500 text-[10px] uppercase tracking-widest mb-1">Online_Players</p>
+                <p className="text-4xl font-headline font-bold text-white">{stats.onlinePlayers}</p>
+              </div>
+              <div>
+                <p className="text-neutral-500 text-[10px] uppercase tracking-widest mb-1">Active_Shops</p>
+                <p className="text-4xl font-headline font-bold text-white">{stats.offlineShops}</p>
+              </div>
+              <div>
+                <p className="text-neutral-500 text-[10px] uppercase tracking-widest mb-1">Total_Pets</p>
+                <p className="text-4xl font-headline font-bold text-white">{stats.totalPets}</p>
+              </div>
+              <div>
+                <p className="text-neutral-500 text-[10px] uppercase tracking-widest mb-1">Uptime</p>
+                <p className="text-4xl font-headline font-bold text-white">99.9%</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={Cpu} label="CPU Kullanımı" value={stats.cpuUsage} color="bg-slate-500" subtext="Anlık Tüketim" />
-        <StatCard icon={HardDrive} label="Disk Alanı" value={stats.diskUsage} color="bg-purple-500" subtext="Sunucu Depolama" />
-        <StatCard icon={Zap} label="Gecikme" value="12ms" color="bg-pink-500" subtext="MySQL Yanıt Süresi" />
-        <StatCard icon={Shield} label="Güvenlik" value="Aktif" color="bg-indigo-500" subtext="Firewall Durumu" />
-      </div>
+        {/* Resources Card */}
+        <div className="md:col-span-4 glass-panel p-8 rounded-3xl">
+          <h3 className="text-purple-400 font-headline text-xs font-bold uppercase tracking-widest mb-6">SERVER_RESOURCES</h3>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] uppercase tracking-widest text-neutral-400">
+                <span>CPU_LOAD</span>
+                <span>{stats.cpuUsage}</span>
+              </div>
+              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: stats.cpuUsage }}
+                  className="h-full bg-blue-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] uppercase tracking-widest text-neutral-400">
+                <span>MEMORY_USAGE</span>
+                <span>45%</span>
+              </div>
+              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "45%" }}
+                  className="h-full bg-purple-400"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] uppercase tracking-widest text-neutral-400">
+                <span>DISK_SPACE</span>
+                <span>{stats.diskUsage}</span>
+              </div>
+              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "60%" }}
+                  className="h-full bg-emerald-400"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 shadow-md border-none bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Activity size={18} className="text-blue-500"/> Oyuncu Aktifliği (Canlı)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] min-h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                  <XAxis dataKey="time" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', borderRadius: '8px' }} />
-                  <Line type="monotone" dataKey="players" stroke="#3b82f6" strokeWidth={3} dot={false} isAnimationActive={false} />
-                </LineChart>
-              </ResponsiveContainer>
+        {/* Chart Card */}
+        <div className="md:col-span-9 glass-panel p-8 rounded-3xl">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-blue-400 font-headline text-xs font-bold uppercase tracking-widest">ACTIVE_USERS_TIMELINE</h3>
+            <div className="flex gap-2">
+              <div className="h-2 w-2 rounded-full bg-blue-400" />
+              <span className="text-[10px] text-neutral-500 uppercase tracking-widest">Live_Feed</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                <XAxis 
+                  dataKey="time" 
+                  stroke="#525252" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false}
+                  tickFormatter={(val) => val}
+                />
+                <YAxis stroke="#525252" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#0e0e0e', 
+                    borderColor: '#ffffff10', 
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em'
+                  }} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="players" 
+                  stroke="#60a5fa" 
+                  strokeWidth={2} 
+                  dot={false} 
+                  isAnimationActive={true} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-        <Card className="shadow-md border-none bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Server size={18} className="text-purple-500"/> Sunucu Bilgileri</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3 text-sm font-medium">
-                <ShieldCheck size={18} className="text-emerald-500" /> Güvenlik Duvarı
-              </div>
-              <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">AKTİF</span>
+        {/* Quick Actions */}
+        <div className="md:col-span-3 flex flex-col gap-6">
+          <div className="glass-panel p-6 rounded-3xl flex-1 flex flex-col justify-between group hover:bg-blue-400/5 transition-colors">
+            <h3 className="text-blue-400 font-headline text-[10px] font-bold uppercase tracking-widest mb-4">QUICK_ACTIONS</h3>
+            <div className="space-y-3">
+              <Link to="/console" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group/btn">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 group-hover/btn:text-white">Open_Console</span>
+                <Terminal size={14} className="text-neutral-500 group-hover/btn:text-blue-400" />
+              </Link>
+              <Link to="/server-control" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group/btn">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 group-hover/btn:text-white">Server_Control</span>
+                <Zap size={14} className="text-neutral-500 group-hover/btn:text-emerald-400" />
+              </Link>
+              <Link to="/db" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group/btn">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 group-hover/btn:text-white">Database_Manager</span>
+                <Database size={14} className="text-neutral-500 group-hover/btn:text-purple-400" />
+              </Link>
             </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3 text-sm font-medium">
-                <Database size={18} className="text-blue-500" /> MySQL Bağlantısı
-              </div>
-              <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">BAŞARILI</span>
+          </div>
+          
+          <div className="glass-panel p-6 rounded-3xl bg-emerald-400/5 border-emerald-400/20">
+            <div className="flex items-center gap-3 mb-4">
+              <ShieldCheck size={20} className="text-emerald-400" />
+              <h3 className="text-emerald-400 font-headline text-[10px] font-bold uppercase tracking-widest">SECURITY_STATUS</h3>
             </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3 text-sm font-medium">
-                <Terminal size={18} className="text-amber-500" /> SSH Bağlantısı
-              </div>
-              <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">BAŞARILI</span>
-            </div>
-            
-            <div className="pt-4 border-t space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">RAM Kullanımı</span>
-                <span className="font-medium">Tahmini %45</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 w-[45%]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-neutral-400 text-[10px] leading-relaxed uppercase tracking-widest">All systems operational. Firewall active and monitoring traffic.</p>
+          </div>
+        </div>
       </div>
     </div>
   );

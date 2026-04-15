@@ -45,95 +45,96 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-2xl border-primary/20 backdrop-blur-sm bg-card/80">
-        <CardHeader className="text-center space-y-1">
-          <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
-            <Server className="text-primary-foreground" size={24} />
+    <div className="flex items-center justify-center min-h-[80vh] p-4">
+      <div className="w-full max-w-2xl glass-panel rounded-3xl overflow-hidden border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+        <div className="p-8 border-b border-white/5 bg-white/[0.02] text-center">
+          <div className="mx-auto w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+            <Server className="text-blue-400" size={32} />
           </div>
-          <CardTitle className="text-3xl font-bold tracking-tight">Sunucu Bağlantısı</CardTitle>
-          <CardDescription>
-            Yönetim paneline erişmek için sunucu ve veritabanı bilgilerinizi girin.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
-            <Info className="text-red-500 shrink-0 mt-0.5" size={20} />
-            <div className="text-sm text-red-500">
-              <strong className="block mb-1 text-red-600 text-lg">Nasıl Bağlanılır?</strong>
-              <ul className="list-disc pl-4 space-y-1">
-                <li><strong>SSH Ayarları:</strong> Sunucunuzun IP adresini, SSH portunu (genelde 22), kullanıcı adını (genelde root) ve şifresini girin. Bu bilgiler, sunucu dosyalarınızı (/usr/game) yönetmek içindir.</li>
-                <li><strong>MySQL Ayarları:</strong> Veritabanı IP adresinizi (aynı sunucudaysa IP'yi yazın), portunu (genelde 3306), kullanıcı adını ve şifresini girin.</li>
-                <li>Bağlantı sağlandıktan sonra tüm panel özellikleri aktifleşecektir.</li>
-              </ul>
+          <h1 className="text-3xl font-headline font-bold text-white tracking-tighter uppercase neon-glow-primary">CORE_INITIALIZATION</h1>
+          <p className="text-neutral-500 text-[10px] uppercase tracking-[0.3em] mt-2">Establish secure connection to server infrastructure</p>
+        </div>
+        
+        <div className="p-8">
+          <div className="mb-8 p-6 bg-blue-500/5 border border-blue-500/10 rounded-2xl flex items-start gap-4">
+            <Info className="text-blue-400 shrink-0 mt-0.5" size={20} />
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-400">CONNECTION_PROTOCOL</h4>
+              <p className="text-[10px] text-neutral-400 leading-relaxed uppercase tracking-widest">
+                Please provide valid SSH and MySQL credentials to authorize access to the game core and database systems.
+              </p>
             </div>
           </div>
 
-          <Tabs defaultValue="ssh" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="ssh" className="gap-2">
-                <Globe size={16} /> SSH Ayarları
+          <Tabs defaultValue="ssh" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-2 bg-white/5 p-1 rounded-xl h-12">
+              <TabsTrigger value="ssh" className="rounded-lg text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all">
+                SSH_CONFIG
               </TabsTrigger>
-              <TabsTrigger value="db" className="gap-2">
-                <Database size={16} /> MySQL Ayarları
+              <TabsTrigger value="db" className="rounded-lg text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all">
+                MYSQL_CONFIG
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="ssh" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <TabsContent value="ssh" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Sunucu IP / Host</label>
-                  <Input name="sshHost" value={creds.sshHost} onChange={handleChange} placeholder="1.2.3.4" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">HOST_ADDRESS</label>
+                  <Input name="sshHost" value={creds.sshHost} onChange={handleChange} placeholder="127.0.0.1" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Port</label>
-                  <Input name="sshPort" value={creds.sshPort} onChange={handleChange} placeholder="22" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">PORT</label>
+                  <Input name="sshPort" value={creds.sshPort} onChange={handleChange} placeholder="22" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Kullanıcı Adı</label>
-                <Input name="sshUser" value={creds.sshUser} onChange={handleChange} placeholder="root" />
+                <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">AUTH_USER</label>
+                <Input name="sshUser" value={creds.sshUser} onChange={handleChange} placeholder="root" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Şifre</label>
-                <Input name="sshPassword" type="password" value={creds.sshPassword} onChange={handleChange} placeholder="••••••••" />
+                <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">AUTH_PASS</label>
+                <Input name="sshPassword" type="password" value={creds.sshPassword} onChange={handleChange} placeholder="••••••••" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
               </div>
             </TabsContent>
 
-            <TabsContent value="db" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <TabsContent value="db" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">DB Host</label>
-                  <Input name="dbHost" value={creds.dbHost} onChange={handleChange} placeholder="localhost" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">DB_HOST</label>
+                  <Input name="dbHost" value={creds.dbHost} onChange={handleChange} placeholder="localhost" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">DB Port</label>
-                  <Input name="dbPort" value={creds.dbPort} onChange={handleChange} placeholder="3306" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">DB_PORT</label>
+                  <Input name="dbPort" value={creds.dbPort} onChange={handleChange} placeholder="3306" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">DB Kullanıcı</label>
-                  <Input name="dbUser" value={creds.dbUser} onChange={handleChange} placeholder="root" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">DB_USER</label>
+                  <Input name="dbUser" value={creds.dbUser} onChange={handleChange} placeholder="root" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">DB Adı</label>
-                  <Input name="dbName" value={creds.dbName} onChange={handleChange} placeholder="player" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">DB_NAME</label>
+                  <Input name="dbName" value={creds.dbName} onChange={handleChange} placeholder="player" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">DB Şifre</label>
-                <Input name="dbPassword" type="password" value={creds.dbPassword} onChange={handleChange} placeholder="••••••••" />
+                <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">DB_PASS</label>
+                <Input name="dbPassword" type="password" value={creds.dbPassword} onChange={handleChange} placeholder="••••••••" className="bg-white/5 border-white/10 h-12 rounded-xl text-white focus:ring-blue-500/50" />
               </div>
             </TabsContent>
 
-            <Button className="w-full h-12 text-lg gap-2 shadow-lg shadow-primary/20" onClick={handleConnect} disabled={loading}>
-              {loading ? <RefreshCw className="animate-spin" /> : <LogIn size={20} />}
-              {loading ? "Bağlanılıyor..." : "Bağlan ve Devam Et"}
+            <Button 
+              className="w-full h-14 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-[0.2em] gap-3 shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all active:scale-[0.98]" 
+              onClick={handleConnect} 
+              disabled={loading}
+            >
+              {loading ? <RefreshCw className="animate-spin" /> : <LogIn size={18} />}
+              {loading ? "INITIALIZING_CONNECTION..." : "ESTABLISH_CONNECTION"}
             </Button>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -79,125 +79,140 @@ export default function PlayerManager() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-[1600px] mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Oyuncu Yönetimi</h2>
-          <p className="text-muted-foreground">Oyuncu bilgilerini düzenleyin, banlayın veya yetki verin.</p>
+          <h1 className="text-4xl font-headline font-bold text-white tracking-tighter uppercase neon-glow-primary">PLAYER_MANAGEMENT</h1>
+          <p className="text-neutral-500 text-xs uppercase tracking-[0.3em] mt-2">Manage players, accounts and permissions</p>
         </div>
-        <Button variant="outline" onClick={fetchPlayersAndAccounts} disabled={loading} className="gap-2">
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <Input
+              placeholder="SEARCH_PLAYER..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 bg-white/5 border-white/10 text-xs uppercase tracking-widest h-11 rounded-xl focus:ring-primary/50"
+            />
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={fetchPlayersAndAccounts} 
+            disabled={loading} 
+            className="h-11 px-6 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest gap-2"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> 
+            SYNC_DATA
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Oyuncu Listesi</CardTitle>
-            <div className="relative w-72">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="İsim veya ID ile ara..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-8"
-              />
-            </div>
+      <div className="glass-panel rounded-3xl overflow-hidden border-white/5">
+        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+          <h3 className="text-blue-400 font-headline text-xs font-bold uppercase tracking-widest">ACTIVE_PLAYERS_DATABASE</h3>
+          <div className="text-[10px] text-neutral-500 uppercase tracking-widest">
+            Total_Records: <span className="text-white">{filteredPlayers.length}</span>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[600px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">ID</TableHead>
-                  <TableHead>Hesap</TableHead>
-                  <TableHead>İsim</TableHead>
-                  <TableHead>Level</TableHead>
-                  <TableHead>Exp</TableHead>
-                  <TableHead>Gold</TableHead>
-                  <TableHead>Son Giriş</TableHead>
-                  <TableHead className="text-right">İşlemler</TableHead>
+        </div>
+        <div className="overflow-x-auto custom-scrollbar">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/5 hover:bg-transparent">
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4 pl-8">ID_HASH</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4">ACCOUNT_LOGIN</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4">PLAYER_NAME</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4 text-center">LVL</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4 text-right">GOLD_RESERVE</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4">LAST_ACCESS</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest text-neutral-500 py-4 text-right pr-8">ACTIONS</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPlayers.map((player) => (
+                <TableRow key={player.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
+                  <TableCell className="font-mono text-[10px] text-neutral-500 pl-8">{player.id}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-blue-400 uppercase tracking-tight">
+                        {accounts[String(player.account_id)] || "NULL_ACCOUNT"}
+                      </span>
+                      <span className="text-[9px] text-neutral-600 font-mono">UID: {player.account_id}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-headline font-bold text-white tracking-tight">{player.name}</span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="inline-flex items-center justify-center h-7 w-10 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-emerald-400">
+                      {player.level}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className="text-xs font-mono text-amber-400/80">{player.gold.toLocaleString()}</span>
+                  </TableCell>
+                  <TableCell className="text-[10px] text-neutral-500 uppercase tracking-widest">
+                    {new Date(player.last_play).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right pr-8">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(player)} className="h-8 w-8 rounded-lg hover:bg-blue-400/10 hover:text-blue-400">
+                        <Edit2 size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-amber-400/10 hover:text-amber-400">
+                        <ShieldAlert size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-error/10 hover:text-error">
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPlayers.map((player) => (
-                  <TableRow key={player.id}>
-                    <TableCell className="font-mono text-xs">{player.id}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-blue-600">
-                          {accounts[String(player.account_id)] || "Bilinmeyen Hesap"}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-mono">ID: {player.account_id}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-bold">{player.name}</TableCell>
-                    <TableCell>{player.level}</TableCell>
-                    <TableCell>{player.exp.toLocaleString()}</TableCell>
-                    <TableCell>{player.gold.toLocaleString()}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(player.last_play).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(player)}>
-                          <Edit2 size={16} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-amber-500">
-                          <ShieldAlert size={16} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive">
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Oyuncu Düzenle: {selectedPlayer?.name}</DialogTitle>
+        <DialogContent className="bg-neutral-950 border-white/10 rounded-3xl p-8 max-w-md">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-2xl font-headline font-bold text-white tracking-tight uppercase">EDIT_PLAYER_DATA</DialogTitle>
+            <p className="text-neutral-500 text-[10px] uppercase tracking-widest">Modifying: {selectedPlayer?.name}</p>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right text-sm">Level</label>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">LEVEL_OVERRIDE</label>
               <Input 
                 type="number" 
-                className="col-span-3" 
+                className="bg-white/5 border-white/10 h-12 rounded-xl text-white" 
                 value={selectedPlayer?.level || ""} 
                 onChange={(e) => setSelectedPlayer({...selectedPlayer, level: e.target.value})}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right text-sm">Gold</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">GOLD_RESERVE</label>
               <Input 
                 type="number" 
-                className="col-span-3" 
+                className="bg-white/5 border-white/10 h-12 rounded-xl text-white" 
                 value={selectedPlayer?.gold || ""} 
                 onChange={(e) => setSelectedPlayer({...selectedPlayer, gold: e.target.value})}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right text-sm">Exp</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">EXP_POINTS</label>
               <Input 
                 type="number" 
-                className="col-span-3" 
+                className="bg-white/5 border-white/10 h-12 rounded-xl text-white" 
                 value={selectedPlayer?.exp || ""} 
                 onChange={(e) => setSelectedPlayer({...selectedPlayer, exp: e.target.value})}
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>İptal</Button>
-            <Button onClick={savePlayer}>Kaydet</Button>
+          <DialogFooter className="mt-8 gap-3">
+            <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)} className="h-12 rounded-xl uppercase text-[10px] font-bold tracking-widest px-8">CANCEL</Button>
+            <Button onClick={savePlayer} className="h-12 rounded-xl bg-blue-500 hover:bg-blue-600 text-white uppercase text-[10px] font-bold tracking-widest px-8 shadow-[0_0_20px_rgba(59,130,246,0.3)]">SAVE_CHANGES</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -148,151 +148,165 @@ export default function MarketAnalytics() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-[1600px] mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Ekonomi Monitörü</h2>
-          <p className="text-muted-foreground">Pazar yöneticisi, fiyat analizleri ve canlı işlem takibi.</p>
+          <h1 className="text-4xl font-headline font-bold text-white tracking-tighter uppercase neon-glow-primary">ECONOMY_MONITOR</h1>
+          <p className="text-neutral-500 text-xs uppercase tracking-[0.3em] mt-2">Real-time market analysis, price trends and transaction logs</p>
         </div>
-        <Button variant="outline" onClick={fetchData} disabled={loading} className="gap-2">
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Yenile
+        <Button 
+          variant="outline" 
+          onClick={fetchData} 
+          disabled={loading} 
+          className="h-11 px-6 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest gap-2"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> 
+          REFRESH_DATA
         </Button>
       </div>
 
       <Tabs defaultValue="analysis" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-4">
-          <TabsTrigger value="analysis" className="gap-2"><BarChart3 size={16} /> Fiyat Analizi</TabsTrigger>
-          <TabsTrigger value="top_rare" className="gap-2"><Activity size={16} /> Trendler & Nadir</TabsTrigger>
-          <TabsTrigger value="offline_shop" className="gap-2"><Store size={16} /> Pazar Satışları</TabsTrigger>
-          <TabsTrigger value="yang_transfer" className="gap-2"><ArrowRightLeft size={16} /> Yang Transferleri</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-white/5 p-1 rounded-2xl h-14 mb-8">
+          <TabsTrigger value="analysis" className="rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all gap-2">
+            <BarChart3 size={14} /> PRICE_ANALYSIS
+          </TabsTrigger>
+          <TabsTrigger value="top_rare" className="rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all gap-2">
+            <Activity size={14} /> TRENDS_&_RARE
+          </TabsTrigger>
+          <TabsTrigger value="offline_shop" className="rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all gap-2">
+            <Store size={14} /> MARKET_SALES
+          </TabsTrigger>
+          <TabsTrigger value="yang_transfer" className="rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all gap-2">
+            <ArrowRightLeft size={14} /> YANG_TRANSFERS
+          </TabsTrigger>
         </TabsList>
 
         {/* TAB 1: FİYAT ANALİZİ */}
-        <TabsContent value="analysis" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <TabsContent value="analysis" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Sol Taraf: Eşya Listesi */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Eşya Seçimi</CardTitle>
-                <div className="relative mt-2">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <div className="lg:col-span-4 glass-panel rounded-3xl overflow-hidden border-white/5">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-4">ITEM_SELECTION</h3>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600" />
                   <Input
-                    placeholder="Eşya ara..."
+                    placeholder="SEARCH_ITEM..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-8"
+                    className="pl-10 bg-white/5 border-white/10 h-11 rounded-xl text-xs uppercase tracking-widest"
                   />
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[600px]">
-                  <div className="flex flex-col">
-                    {filteredItems.map((item, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedItem(item)}
-                        className={`flex items-center justify-between p-3 border-b text-left hover:bg-muted/50 transition-colors ${selectedItem?.vnum === item.vnum ? 'bg-muted border-l-4 border-l-blue-500' : ''}`}
-                      >
-                        <div>
-                          <div className="font-bold text-sm">{item.name}</div>
-                          <div className="text-[10px] text-muted-foreground font-mono">VNUM: {item.vnum}</div>
+              </div>
+              <ScrollArea className="h-[600px]">
+                <div className="flex flex-col">
+                  {filteredItems.map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedItem(item)}
+                      className={`flex items-center justify-between p-5 border-b border-white/5 text-left transition-all group ${selectedItem?.vnum === item.vnum ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : 'hover:bg-white/[0.02]'}`}
+                    >
+                      <div className="space-y-1">
+                        <div className={`text-xs font-bold uppercase tracking-tight transition-colors ${selectedItem?.vnum === item.vnum ? 'text-blue-400' : 'text-white'}`}>{item.name}</div>
+                        <div className="text-[9px] text-neutral-600 font-mono">VNUM: {item.vnum}</div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <div className="font-mono text-xs font-bold text-emerald-400">{formatYang(item.avg_price)}</div>
+                        <div className={`text-[9px] font-bold flex items-center justify-end gap-0.5 ${item.trend === 'up' ? 'text-emerald-500' : 'text-error'}`}>
+                          {item.trend === 'up' ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                          {Math.abs(item.trend_percent).toFixed(1)}%
                         </div>
-                        <div className="text-right">
-                          <div className="font-mono text-xs font-bold text-emerald-600">{formatYang(item.avg_price)}</div>
-                          <div className={`text-[10px] font-bold flex items-center justify-end gap-0.5 ${item.trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {item.trend === 'up' ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
-                            {Math.abs(item.trend_percent).toFixed(1)}%
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
 
             {/* Sağ Taraf: Item Detay Sayfası */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-8 space-y-8">
               {selectedItem ? (
                 <>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card className="bg-blue-500/5 border-blue-500/20">
-                      <CardContent className="p-4">
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1">Ortalama Fiyat</div>
-                        <div className="text-lg font-bold text-blue-600 flex items-center gap-1">
-                          <Coins size={16} /> {formatYang(selectedItem.avg_price)}
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1">Min Fiyat</div>
-                        <div className="text-lg font-bold font-mono">{formatYang(selectedItem.min_price)}</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1">Max Fiyat</div>
-                        <div className="text-lg font-bold font-mono">{formatYang(selectedItem.max_price)}</div>
-                      </CardContent>
-                    </Card>
-                    <Card className={selectedItem.trend === 'up' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}>
-                      <CardContent className="p-4">
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1">Toplam Satış</div>
-                        <div className={`text-lg font-bold flex items-center gap-1 ${selectedItem.trend === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
-                          <Package size={16} /> {selectedItem.total_sales.toLocaleString()}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="glass-panel p-6 rounded-3xl border-blue-500/20 bg-blue-500/[0.02]">
+                      <div className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mb-3">AVG_MARKET_PRICE</div>
+                      <div className="text-xl font-headline font-bold text-blue-400 flex items-center gap-2">
+                        <Coins size={18} /> {formatYang(selectedItem.avg_price)}
+                      </div>
+                    </div>
+                    <div className="glass-panel p-6 rounded-3xl border-white/5">
+                      <div className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mb-3">MIN_RECORDED</div>
+                      <div className="text-xl font-headline font-bold text-white">{formatYang(selectedItem.min_price)}</div>
+                    </div>
+                    <div className="glass-panel p-6 rounded-3xl border-white/5">
+                      <div className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mb-3">MAX_RECORDED</div>
+                      <div className="text-xl font-headline font-bold text-white">{formatYang(selectedItem.max_price)}</div>
+                    </div>
+                    <div className={`glass-panel p-6 rounded-3xl border-white/5 ${selectedItem.trend === 'up' ? 'bg-emerald-500/[0.02] border-emerald-500/20' : 'bg-error/[0.02] border-error/20'}`}>
+                      <div className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mb-3">TOTAL_SALES_VOL</div>
+                      <div className={`text-xl font-headline font-bold flex items-center gap-2 ${selectedItem.trend === 'up' ? 'text-emerald-400' : 'text-error'}`}>
+                        <Package size={18} /> {selectedItem.total_sales.toLocaleString()}
+                      </div>
+                    </div>
                   </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <History size={18} className="text-amber-500" /> Tarihsel Fiyat Değişimi (7 Gün)
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-[300px] min-h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={selectedItem.history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} stopOpacity={0.3}/>
-                                <stop offset="95%" stopColor={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" opacity={0.2} />
-                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
-                            <YAxis 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fontSize: 10 }}
-                              tickFormatter={(value) => formatYang(value)}
-                              domain={['auto', 'auto']}
-                            />
-                            <Tooltip 
-                              formatter={(value: number) => [`${value.toLocaleString()} Yang`, 'Fiyat']}
-                              contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', borderRadius: '8px', fontSize: '12px' }}
-                            />
-                            <Area 
-                              type="monotone" 
-                              dataKey="price" 
-                              stroke={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} 
-                              strokeWidth={3}
-                              fillOpacity={1} 
-                              fill="url(#colorPrice)" 
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="glass-panel p-8 rounded-3xl border-white/5">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-white flex items-center gap-3">
+                        <History size={16} className="text-amber-400" /> HISTORICAL_PRICE_INDEX (7D)
+                      </h3>
+                      <div className="text-[10px] text-neutral-500 uppercase tracking-widest">Live_Market_Feed</div>
+                    </div>
+                    <div className="h-[350px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={selectedItem.history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" opacity={0.1} />
+                          <XAxis 
+                            dataKey="date" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fontSize: 9, fill: '#666' }} 
+                            dy={10}
+                          />
+                          <YAxis 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fontSize: 9, fill: '#666' }}
+                            tickFormatter={(value) => formatYang(value)}
+                            domain={['auto', 'auto']}
+                          />
+                          <Tooltip 
+                            formatter={(value: number) => [`${value.toLocaleString()} Yang`, 'PRICE']}
+                            contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#333', borderRadius: '12px', fontSize: '10px', color: '#fff' }}
+                            itemStyle={{ color: selectedItem.trend === 'up' ? '#10b981' : '#ef4444' }}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="price" 
+                            stroke={selectedItem.trend === 'up' ? '#10b981' : '#ef4444'} 
+                            strokeWidth={3}
+                            fillOpacity={1} 
+                            fill="url(#colorPrice)" 
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-muted-foreground border border-dashed rounded-xl p-12">
-                  <BarChart3 size={48} className="mb-4 opacity-20" />
-                  <p>Detaylı analiz ve grafikler için sol taraftan bir eşya seçin.</p>
+                <div className="h-full min-h-[500px] flex flex-col items-center justify-center glass-panel rounded-3xl border-white/5 border-dashed p-12">
+                  <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                    <BarChart3 size={32} className="text-neutral-700" />
+                  </div>
+                  <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-2">NO_ITEM_SELECTED</h4>
+                  <p className="text-xs text-neutral-500 uppercase tracking-widest">Select an item from the database to view detailed analytics</p>
                 </div>
               )}
             </div>
@@ -300,169 +314,157 @@ export default function MarketAnalytics() {
         </TabsContent>
 
         {/* TAB 2: TRENDLER & NADİR */}
-        <TabsContent value="top_rare" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-500">
-                  <TrendingUp size={20} /> En Çok Satan İtemler
-                </CardTitle>
-                <CardDescription>Satış hacmine göre en popüler eşyalar.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Eşya</TableHead>
-                      <TableHead>Satış Sayısı</TableHead>
-                      <TableHead>Ort. Fiyat</TableHead>
-                      <TableHead className="text-right">Trend</TableHead>
+        <TabsContent value="top_rare" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="glass-panel rounded-3xl overflow-hidden border-white/5">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-3">
+                  <TrendingUp size={16} /> TOP_VOLUME_ITEMS
+                </h3>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 pl-6">ITEM_NAME</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">SALES_VOL</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">AVG_PRICE</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 text-right pr-6">TREND</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topSellers.map((item, i) => (
+                    <TableRow key={i} className="border-white/5 hover:bg-white/[0.02]">
+                      <TableCell className="font-bold text-xs text-white pl-6 uppercase tracking-tight">{item.name}</TableCell>
+                      <TableCell className="font-mono text-[10px] text-neutral-400">{item.total_sales.toLocaleString()}</TableCell>
+                      <TableCell className="font-mono text-[10px] text-emerald-400">{formatYang(item.avg_price)}</TableCell>
+                      <TableCell className="text-right pr-6">
+                        <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold ${item.trend === 'up' ? 'text-emerald-500' : 'text-error'}`}>
+                          {item.trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                          {Math.abs(item.trend_percent).toFixed(1)}%
+                        </span>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topSellers.map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-bold">{item.name}</TableCell>
-                        <TableCell className="font-mono text-xs">{item.total_sales.toLocaleString()}</TableCell>
-                        <TableCell className="font-mono text-xs text-emerald-600">{formatYang(item.avg_price)}</TableCell>
-                        <TableCell className="text-right">
-                          <span className={`inline-flex items-center gap-0.5 text-xs font-bold ${item.trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {item.trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                            {Math.abs(item.trend_percent).toFixed(1)}%
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-amber-500">
-                  <AlertTriangle size={20} /> Nadir & Değerli İtemler
-                </CardTitle>
-                <CardDescription>Piyasada az bulunan, yüksek değerli eşyalar.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Eşya</TableHead>
-                      <TableHead>Satış Sayısı</TableHead>
-                      <TableHead>Ort. Fiyat</TableHead>
-                      <TableHead className="text-right">Fiyat Aralığı</TableHead>
+            <div className="glass-panel rounded-3xl overflow-hidden border-white/5">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-3">
+                  <AlertTriangle size={16} /> RARE_&_VALUABLE_ASSETS
+                </h3>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 pl-6">ITEM_NAME</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">VOL</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">AVG_VAL</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 text-right pr-6">PRICE_RANGE</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rareItems.map((item, i) => (
+                    <TableRow key={i} className="border-white/5 hover:bg-white/[0.02]">
+                      <TableCell className="font-bold text-xs text-amber-400 pl-6 uppercase tracking-tight">{item.name}</TableCell>
+                      <TableCell className="font-mono text-[10px] text-neutral-400">{item.total_sales.toLocaleString()}</TableCell>
+                      <TableCell className="font-mono text-[10px] text-white font-bold">{formatYang(item.avg_price)}</TableCell>
+                      <TableCell className="text-right pr-6 text-[9px] text-neutral-500 font-mono">
+                        {formatYang(item.min_price)} - {formatYang(item.max_price)}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rareItems.map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-bold text-amber-600">{item.name}</TableCell>
-                        <TableCell className="font-mono text-xs">{item.total_sales.toLocaleString()}</TableCell>
-                        <TableCell className="font-mono text-xs font-bold">{formatYang(item.avg_price)}</TableCell>
-                        <TableCell className="text-right text-[10px] text-muted-foreground font-mono">
-                          {formatYang(item.min_price)} - {formatYang(item.max_price)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </TabsContent>
 
         {/* TAB 3: PAZAR SATIŞLARI (OFFLINE SHOP) */}
-        <TabsContent value="offline_shop">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Store className="text-blue-500" size={20} /> Çevrimdışı Pazar Satışları (offline_shop_sale)
-              </CardTitle>
-              <CardDescription>Oyuncuların kurduğu pazarlardan yapılan anlık satın alımlar.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tarih</TableHead>
-                      <TableHead>Satıcı</TableHead>
-                      <TableHead>Alıcı</TableHead>
-                      <TableHead>Eşya</TableHead>
-                      <TableHead>Adet</TableHead>
-                      <TableHead className="text-right">Fiyat</TableHead>
+        <TabsContent value="offline_shop" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="glass-panel rounded-3xl overflow-hidden border-white/5">
+            <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-blue-400 flex items-center gap-3">
+                <Store size={16} /> LIVE_MARKET_TRANSACTIONS
+              </h3>
+            </div>
+            <div className="overflow-x-auto custom-scrollbar">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 pl-6">TIMESTAMP</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">SELLER_ID</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">BUYER_ID</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">ITEM_ENTITY</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">QTY</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 text-right pr-6">UNIT_PRICE</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {offlineShopSales.map((sale, i) => (
+                    <TableRow key={i} className="border-white/5 hover:bg-white/[0.02]">
+                      <TableCell className="text-[10px] text-neutral-500 font-mono pl-6">
+                        {sale.time ? new Date(sale.time).toLocaleString() : "---"}
+                      </TableCell>
+                      <TableCell className="text-xs font-bold text-blue-400 uppercase tracking-tight">{safeRender(sale.seller_name)}</TableCell>
+                      <TableCell className="text-xs font-bold text-emerald-400 uppercase tracking-tight">{safeRender(sale.buyer_name)}</TableCell>
+                      <TableCell className="text-xs text-white font-medium uppercase tracking-tight">
+                        {safeRender(ITEM_NAMES[sale.item_vnum] || `ITEM_${sale.item_vnum}`)}
+                      </TableCell>
+                      <TableCell className="font-mono text-[10px] text-neutral-400">{sale.item_count}</TableCell>
+                      <TableCell className="text-right pr-6 font-mono text-[10px] font-bold text-amber-400">
+                        {sale.price.toLocaleString()} <span className="text-[8px] text-neutral-600">YNG</span>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {offlineShopSales.map((sale, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-xs text-muted-foreground font-mono">
-                          {sale.time ? new Date(sale.time).toLocaleString() : "---"}
-                        </TableCell>
-                        <TableCell className="font-bold text-blue-600">{safeRender(sale.seller_name)}</TableCell>
-                        <TableCell className="font-bold text-emerald-600">{safeRender(sale.buyer_name)}</TableCell>
-                        <TableCell className="font-medium">
-                          {safeRender(ITEM_NAMES[sale.item_vnum] || `Eşya (${sale.item_vnum})`)}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{sale.item_count}</TableCell>
-                        <TableCell className="text-right font-mono text-xs font-bold text-amber-600">
-                          {sale.price.toLocaleString()} Yang
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </TabsContent>
 
         {/* TAB 4: YANG TRANSFERLERİ */}
-        <TabsContent value="yang_transfer">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowRightLeft className="text-emerald-500" size={20} /> Yang Transfer Logu (yang_transfer_log)
-              </CardTitle>
-              <CardDescription>Oyuncular arası yüksek miktarlı Yang transferleri ve sebepleri.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[600px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tarih</TableHead>
-                      <TableHead>Gönderen</TableHead>
-                      <TableHead>Alıcı</TableHead>
-                      <TableHead>Sebep / Tür</TableHead>
-                      <TableHead className="text-right">Miktar</TableHead>
+        <TabsContent value="yang_transfer" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="glass-panel rounded-3xl overflow-hidden border-white/5">
+            <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-3">
+                <ArrowRightLeft size={16} /> HIGH_VALUE_TRANSFERS
+              </h3>
+            </div>
+            <div className="overflow-x-auto custom-scrollbar">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 pl-6">TIMESTAMP</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">SOURCE_ENTITY</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">TARGET_ENTITY</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4">PROTOCOL_REASON</TableHead>
+                    <TableHead className="text-[9px] uppercase tracking-widest text-neutral-500 py-4 text-right pr-6">TRANSFER_AMOUNT</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {yangTransfers.map((transfer, i) => (
+                    <TableRow key={i} className="border-white/5 hover:bg-white/[0.02]">
+                      <TableCell className="text-[10px] text-neutral-500 font-mono pl-6">
+                        {transfer.time ? new Date(transfer.time).toLocaleString() : "---"}
+                      </TableCell>
+                      <TableCell className="text-xs font-bold text-error uppercase tracking-tight">{safeRender(transfer.from_name)}</TableCell>
+                      <TableCell className="text-xs font-bold text-emerald-400 uppercase tracking-tight">{safeRender(transfer.to_name)}</TableCell>
+                      <TableCell>
+                        <span className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-neutral-400">
+                          {safeRender(transfer.reason)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right pr-6 font-mono text-[10px] font-bold text-emerald-400">
+                        + {transfer.amount.toLocaleString()} <span className="text-[8px] text-neutral-600">YNG</span>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {yangTransfers.map((transfer, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-xs text-muted-foreground font-mono">
-                          {transfer.time ? new Date(transfer.time).toLocaleString() : "---"}
-                        </TableCell>
-                        <TableCell className="font-bold text-red-500">{safeRender(transfer.from_name)}</TableCell>
-                        <TableCell className="font-bold text-emerald-500">{safeRender(transfer.to_name)}</TableCell>
-                        <TableCell>
-                          <span className="px-2 py-1 rounded bg-muted text-[10px] font-bold uppercase">
-                            {safeRender(transfer.reason)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-xs font-bold text-emerald-600">
-                          + {transfer.amount.toLocaleString()} Yang
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </TabsContent>
 
       </Tabs>

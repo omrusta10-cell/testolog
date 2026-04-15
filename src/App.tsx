@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
-import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare, Ban, Globe, Gift, Map, Medal, Home, Calendar, Megaphone, ShieldX, Sparkles, ShieldAlert, Ticket, Crown, Navigation, Store, RefreshCw, Server, ShieldAlert as ShieldAlertIcon, FileCode, HardDrive, ArrowRightLeft, MessageCircle, TrendingUp, MapPin, Bug, Wrench, Activity, Shield, Dog, Gem, Gavel, Coins, LayoutGrid, Tag, Swords, Vote, Fish, FileText, Ghost } from "lucide-react";
+import { LayoutDashboard, FolderTree, Database, Terminal, Settings as SettingsIcon, Menu, X, LogOut, Users, UserCircle, ShieldCheck, Trophy, Zap, Box, ShoppingBag, ScrollText, Package, Lock, UserX, Heart, History, MessageSquare, Ban, Globe, Gift, Map, Medal, Home, Calendar, Megaphone, ShieldX, Sparkles, ShieldAlert, Ticket, Crown, Navigation, Store, RefreshCw, Server, ShieldAlert as ShieldAlertIcon, FileCode, HardDrive, ArrowRightLeft, MessageCircle, TrendingUp, MapPin, Bug, Wrench, Activity, Shield, Dog, Gem, Gavel, Coins, LayoutGrid, Tag, Swords, Vote, Fish, FileText } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster, toast } from "sonner";
@@ -86,21 +86,23 @@ const SidebarItem = ({ icon: Icon, label, to, active, isConnected }: { icon: any
     return (
       <div 
         onClick={() => toast.error("Lütfen önce SSH ve MySQL bağlantılarını sağlayın.")}
-        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-muted text-muted-foreground opacity-50`}
+        className="flex items-center gap-3 px-4 py-3 text-neutral-500 opacity-50 cursor-not-allowed font-medium text-sm uppercase tracking-widest"
       >
-        <Lock size={20} />
-        <span className="font-medium">{label}</span>
+        <Icon size={18} />
+        <span>{label}</span>
       </div>
     );
   }
 
   return (
     <Link to={to}>
-      <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-        active ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-muted text-muted-foreground"
+      <div className={`flex items-center gap-3 px-4 py-3 transition-all duration-300 rounded-lg group font-medium text-sm uppercase tracking-widest ${
+        active 
+          ? "bg-primary/10 text-primary border-r-4 border-secondary" 
+          : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800"
       }`}>
-        <Icon size={20} />
-        <span className="font-medium">{label}</span>
+        <Icon size={18} className={active ? "text-primary" : "text-neutral-500 group-hover:text-neutral-300"} />
+        <span>{label}</span>
       </div>
     </Link>
   );
@@ -111,119 +113,79 @@ const Layout = ({ children, onLogout, isConnected }: { children: React.ReactNode
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans">
+      {/* TopNavBar */}
+      <header className="fixed top-0 w-full z-50 bg-neutral-950/60 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-8 h-16 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]">
+        <div className="flex items-center gap-8">
+          <Link to="/" className="text-2xl font-bold tracking-tighter text-blue-400 uppercase font-headline">NEON_ARCHITECT</Link>
+          <nav className="hidden md:flex gap-6 items-center">
+            <Link to="/proto-editor" className={`font-headline tracking-tight uppercase text-sm transition-colors ${location.pathname === "/proto-editor" ? "text-blue-400 border-b-2 border-blue-400 pb-1" : "text-neutral-400 hover:text-neutral-200"}`}>Item_Proto</Link>
+            <Link to="/game-data" className={`font-headline tracking-tight uppercase text-sm transition-colors ${location.pathname === "/game-data" ? "text-blue-400 border-b-2 border-blue-400 pb-1" : "text-neutral-400 hover:text-neutral-200"}`}>Oyun Verileri</Link>
+            <Link to="/skills" className={`font-headline tracking-tight uppercase text-sm transition-colors ${location.pathname === "/skills" ? "text-blue-400 border-b-2 border-blue-400 pb-1" : "text-neutral-400 hover:text-neutral-200"}`}>Beceri</Link>
+            <Link to="/item-attrs" className={`font-headline tracking-tight uppercase text-sm transition-colors ${location.pathname === "/item-attrs" ? "text-blue-400 border-b-2 border-blue-400 pb-1" : "text-neutral-400 hover:text-neutral-200"}`}>Efsun</Link>
+            <Link to="/refines" className={`font-headline tracking-tight uppercase text-sm transition-colors ${location.pathname === "/refines" ? "text-blue-400 border-b-2 border-blue-400 pb-1" : "text-neutral-400 hover:text-neutral-200"}`}>Refine</Link>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 text-neutral-400 hover:bg-white/5 rounded-lg transition-colors">
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <button className="p-2 text-neutral-400 hover:bg-white/5 active:scale-95 duration-200 rounded-lg">
+            <Activity size={20} />
+          </button>
+          <Link to="/settings" className="p-2 text-neutral-400 hover:bg-white/5 active:scale-95 duration-200 rounded-lg">
+            <SettingsIcon size={20} />
+          </Link>
+          <div className="h-8 w-8 rounded-full overflow-hidden border border-primary/20">
+            <img alt="Admin Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgiVIgtbIg4LNjdy3ZG1nmeAIw-3k9V4IVQcmgGJaCbz5Y1ixlf5cJCWXnauM8cBY1hfXoHUJTR7I7ffzJawCl_h1JHXz8I_pYqaEkyyMQxUBH7O1HFtTx9tpAVwnDAnl60C-lOkMHxe9CrgZx4KYOoF0fWdm8RIdDkJnimJYWVLDSttxtx8GtXWZWgPwIH7zIPl1bH69d0QYrig_o2br37lIB2GomlQFCrtQDRAYcX0pDWp6k6_csXtoVAB0tYvMtW0D8Dd-T6rfO" />
+          </div>
+        </div>
+      </header>
+
       {/* Sidebar */}
       <motion.aside 
         initial={false}
-        animate={{ width: isSidebarOpen ? 260 : 80 }}
-        className="border-r bg-card flex flex-col z-20"
+        animate={{ width: isSidebarOpen ? 260 : 0, x: isSidebarOpen ? 0 : -260 }}
+        className="fixed left-0 top-0 h-screen bg-neutral-900 flex flex-col py-6 gap-4 z-40 pt-20 border-r border-white/5 overflow-hidden"
       >
-        <div className="p-6 flex items-center justify-between">
-          {isSidebarOpen && <h1 className="text-xl font-bold tracking-tighter">GAME PANEL</h1>}
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-muted rounded-md">
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+        <div className="px-6 mb-4">
+          <h3 className="text-emerald-400 font-headline text-xs font-bold uppercase tracking-widest">ADM_CORE_01</h3>
+          <p className="text-neutral-500 text-[10px] tracking-[0.2em] uppercase">SYSTEM_ACTIVE</p>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          <SidebarItem icon={LayoutDashboard} label={isSidebarOpen ? "Dashboard" : ""} to="/" active={location.pathname === "/"} isConnected={isConnected} />
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+          <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" active={location.pathname === "/"} isConnected={isConnected} />
+          <SidebarItem icon={Users} label="Oyuncular" to="/players" active={location.pathname === "/players"} isConnected={isConnected} />
+          <SidebarItem icon={UserCircle} label="Hesaplar" to="/accounts" active={location.pathname === "/accounts"} isConnected={isConnected} />
+          <SidebarItem icon={ShoppingBag} label="Nesne Market" to="/shops" active={location.pathname === "/shops"} isConnected={isConnected} />
+          <SidebarItem icon={Store} label="Pazarlar" to="/offline-shops" active={location.pathname === "/offline-shops"} isConnected={isConnected} />
+          <SidebarItem icon={History} label="Log Yönetimi" to="/logs" active={location.pathname === "/logs"} isConnected={isConnected} />
+          <SidebarItem icon={Server} label="Core Status" to="/server-control" active={location.pathname === "/server-control"} isConnected={isConnected} />
+          <SidebarItem icon={SettingsIcon} label="Sistem Ayarları" to="/server-settings" active={location.pathname === "/server-settings"} isConnected={isConnected} />
           
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            {isSidebarOpen ? "Yönetim" : "---"}
+          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest opacity-50">
+            Gelişmiş
           </div>
-          <SidebarItem icon={Users} label={isSidebarOpen ? "Oyuncular" : ""} to="/players" active={location.pathname === "/players"} isConnected={isConnected} />
-          <SidebarItem icon={UserX} label={isSidebarOpen ? "Silinenler" : ""} to="/players-deleted" active={location.pathname === "/players-deleted"} isConnected={isConnected} />
-          <SidebarItem icon={Package} label={isSidebarOpen ? "Envanter" : ""} to="/inventory" active={location.pathname === "/inventory"} isConnected={isConnected} />
-          <SidebarItem icon={Lock} label={isSidebarOpen ? "Depolar" : ""} to="/safebox" active={location.pathname === "/safebox"} isConnected={isConnected} />
-          <SidebarItem icon={UserCircle} label={isSidebarOpen ? "Hesaplar" : ""} to="/accounts" active={location.pathname === "/accounts"} isConnected={isConnected} />
-          <SidebarItem icon={Trophy} label={isSidebarOpen ? "Loncalar" : ""} to="/guilds" active={location.pathname === "/guilds"} isConnected={isConnected} />
-          <SidebarItem icon={Crown} label={isSidebarOpen ? "Krallık Sistemi" : ""} to="/monarch" active={location.pathname === "/monarch"} isConnected={isConnected} />
-          <SidebarItem icon={Heart} label={isSidebarOpen ? "Evlilikler" : ""} to="/marriages" active={location.pathname === "/marriages"} isConnected={isConnected} />
-          <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Arkadaş Listeleri" : ""} to="/messenger" active={location.pathname === "/messenger"} isConnected={isConnected} />
-          <SidebarItem icon={Zap} label={isSidebarOpen ? "Aktif Etkiler" : ""} to="/affects" active={location.pathname === "/affects"} isConnected={isConnected} />
-          <SidebarItem icon={Gift} label={isSidebarOpen ? "Ödül Dağıtımı" : ""} to="/awards" active={location.pathname === "/awards"} isConnected={isConnected} />
-          <SidebarItem icon={Map} label={isSidebarOpen ? "Lonca Arazileri" : ""} to="/lands" active={location.pathname === "/lands"} isConnected={isConnected} />
-          <SidebarItem icon={Medal} label={isSidebarOpen ? "Sıralamalar" : ""} to="/ranking" active={location.pathname === "/ranking"} isConnected={isConnected} />
-          <SidebarItem icon={Home} label={isSidebarOpen ? "Lonca Nesneleri" : ""} to="/objects" active={location.pathname === "/objects"} isConnected={isConnected} />
-          <SidebarItem icon={Calendar} label={isSidebarOpen ? "Etkinlik Yönetimi" : ""} to="/events" active={location.pathname === "/events"} isConnected={isConnected} />
-          <SidebarItem icon={Megaphone} label={isSidebarOpen ? "Duyuru Yönetimi" : ""} to="/notices" active={location.pathname === "/notices"} isConnected={isConnected} />
-          <SidebarItem icon={ShieldX} label={isSidebarOpen ? "IP Engelleme" : ""} to="/ip-bans" active={location.pathname === "/ip-bans"} isConnected={isConnected} />
-          <SidebarItem icon={Shield} label={isSidebarOpen ? "Gelişmiş Güvenlik" : ""} to="/firewall" active={location.pathname === "/firewall"} isConnected={isConnected} />
-          <SidebarItem icon={ShieldAlert} label={isSidebarOpen ? "Hile Logları" : ""} to="/hack-logs" active={location.pathname === "/hack-logs"} isConnected={isConnected} />
-          <SidebarItem icon={FileText} label={isSidebarOpen ? "Syserr Logları" : ""} to="/system-logs" active={location.pathname === "/system-logs"} isConnected={isConnected} />
-          <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Gelişmiş Loglar" : ""} to="/advanced-logs" active={location.pathname === "/advanced-logs"} isConnected={isConnected} />
-          <SidebarItem icon={MessageSquare} label={isSidebarOpen ? "Sohbet Geçmişi" : ""} to="/chat-logs" active={location.pathname === "/chat-logs"} isConnected={isConnected} />
-          <SidebarItem icon={MessageCircle} label={isSidebarOpen ? "Fısıltı Geçmişi" : ""} to="/whisper-logs" active={location.pathname === "/whisper-logs"} isConnected={isConnected} />
-          <SidebarItem icon={ArrowRightLeft} label={isSidebarOpen ? "Ticaret Geçmişi" : ""} to="/trade-logs" active={location.pathname === "/trade-logs"} isConnected={isConnected} />
-          <SidebarItem icon={ArrowRightLeft} label={isSidebarOpen ? "Krallık Değişimleri" : ""} to="/empire-changes" active={location.pathname === "/empire-changes"} isConnected={isConnected} />
-          <SidebarItem icon={Coins} label={isSidebarOpen ? "Yang Transferleri" : ""} to="/yang-exchanges" active={location.pathname === "/yang-exchanges"} isConnected={isConnected} />
-          <SidebarItem icon={Store} label={isSidebarOpen ? "Çevrimdışı Pazarlar" : ""} to="/offline-shops" active={location.pathname === "/offline-shops"} isConnected={isConnected} />
-          <SidebarItem icon={Package} label={isSidebarOpen ? "Pazar Deposu" : ""} to="/offline-shop-details" active={location.pathname === "/offline-shop-details"} isConnected={isConnected} />
-          <SidebarItem icon={Tag} label={isSidebarOpen ? "Pazar Fiyatları" : ""} to="/shop-prices" active={location.pathname === "/shop-prices"} isConnected={isConnected} />
-          <SidebarItem icon={Trophy} label={isSidebarOpen ? "Yüksek Skorlar" : ""} to="/highscores" active={location.pathname === "/highscores"} isConnected={isConnected} />
-          <SidebarItem icon={Dog} label={isSidebarOpen ? "Pet Sistemi" : ""} to="/pets" active={location.pathname === "/pets"} isConnected={isConnected} />
-          <SidebarItem icon={Gem} label={isSidebarOpen ? "Ejderha Taşı" : ""} to="/dragon-soul" active={location.pathname === "/dragon-soul"} isConnected={isConnected} />
-          <SidebarItem icon={TrendingUp} label={isSidebarOpen ? "Piyasa Analizi" : ""} to="/market-analytics" active={location.pathname === "/market-analytics"} isConnected={isConnected} />
-          <SidebarItem icon={MapPin} label={isSidebarOpen ? "Oyuncu Dağılımı" : ""} to="/map-stats" active={location.pathname === "/map-stats"} isConnected={isConnected} />
-          <SidebarItem icon={LayoutGrid} label={isSidebarOpen ? "Kart Oyunu" : ""} to="/card-game" active={location.pathname === "/card-game"} isConnected={isConnected} />
-          <SidebarItem icon={Ticket} label={isSidebarOpen ? "Piyango (Lotto)" : ""} to="/lottery" active={location.pathname === "/lottery"} isConnected={isConnected} />
-          <SidebarItem icon={Ticket} label={isSidebarOpen ? "Hediye Kodları" : ""} to="/coupons" active={location.pathname === "/coupons"} isConnected={isConnected} />
-          <SidebarItem icon={Crown} label={isSidebarOpen ? "VIP Oyuncular" : ""} to="/vips" active={location.pathname === "/vips"} isConnected={isConnected} />
-          <SidebarItem icon={Zap} label={isSidebarOpen ? "Beceriler" : ""} to="/skills" active={location.pathname === "/skills"} isConnected={isConnected} />
-          <SidebarItem icon={RefreshCw} label={isSidebarOpen ? "Yükseltmeler" : ""} to="/refines" active={location.pathname === "/refines"} isConnected={isConnected} />
-          <SidebarItem icon={Navigation} label={isSidebarOpen ? "Işınlanma Noktaları" : ""} to="/warps" active={location.pathname === "/warps"} isConnected={isConnected} />
-          <SidebarItem icon={Swords} label={isSidebarOpen ? "Lonca Savaşları" : ""} to="/guild-wars" active={location.pathname === "/guild-wars"} isConnected={isConnected} />
-          <SidebarItem icon={Users} label={isSidebarOpen ? "Lonca Üyeleri" : ""} to="/guild-members" active={location.pathname === "/guild-members"} isConnected={isConnected} />
-          <SidebarItem icon={Gavel} label={isSidebarOpen ? "Müzayedeler" : ""} to="/auctions" active={location.pathname === "/auctions"} isConnected={isConnected} />
-          <SidebarItem icon={Heart} label={isSidebarOpen ? "At Yönetimi" : ""} to="/horses" active={location.pathname === "/horses"} isConnected={isConnected} />
-          <SidebarItem icon={Gift} label={isSidebarOpen ? "Eşya Ödülleri" : ""} to="/item-awards" active={location.pathname === "/item-awards"} isConnected={isConnected} />
-          <SidebarItem icon={Sparkles} label={isSidebarOpen ? "Efsun Oranları" : ""} to="/item-attrs" active={location.pathname === "/item-attrs"} isConnected={isConnected} />
-          <SidebarItem icon={FileCode} label={isSidebarOpen ? "Proto Editörü" : ""} to="/proto-editor" active={location.pathname === "/proto-editor"} isConnected={isConnected} />
-          <SidebarItem icon={Ghost} label={isSidebarOpen ? "Drop Yönetimi" : ""} to="/mob-drops" active={location.pathname === "/mob-drops"} isConnected={isConnected} />
-          <SidebarItem icon={Ban} label={isSidebarOpen ? "Yasaklı Kelimeler" : ""} to="/banwords" active={location.pathname === "/banwords"} isConnected={isConnected} />
-          <SidebarItem icon={Globe} label={isSidebarOpen ? "Sunucu Oranları" : ""} to="/privs" active={location.pathname === "/privs"} isConnected={isConnected} />
-          <SidebarItem icon={MapPin} label={isSidebarOpen ? "PC Bang IP" : ""} to="/pcbang" active={location.pathname === "/pcbang"} isConnected={isConnected} />
-          <SidebarItem icon={Server} label={isSidebarOpen ? "Sunucu Kontrol" : ""} to="/server-control" active={location.pathname === "/server-control"} isConnected={isConnected} />
-          <SidebarItem icon={Activity} label={isSidebarOpen ? "Performans Monitörü" : ""} to="/performance" active={location.pathname === "/performance"} isConnected={isConnected} />
-          <SidebarItem icon={Bug} label={isSidebarOpen ? "Core Analizi (GDB)" : ""} to="/core-crash" active={location.pathname === "/core-crash"} isConnected={isConnected} />
-          <SidebarItem icon={Wrench} label={isSidebarOpen ? "Kapsamlı Bakım" : ""} to="/maintenance" active={location.pathname === "/maintenance"} isConnected={isConnected} />
-          <SidebarItem icon={ShieldAlertIcon} label={isSidebarOpen ? "Sistem Hataları" : ""} to="/syslogs" active={location.pathname === "/syslogs"} isConnected={isConnected} />
-          <SidebarItem icon={FileCode} label={isSidebarOpen ? "Quest Derleyici" : ""} to="/quest-compiler" active={location.pathname === "/quest-compiler"} isConnected={isConnected} />
-          <SidebarItem icon={SettingsIcon} label={isSidebarOpen ? "Çekirdek Ayarları" : ""} to="/config-editor" active={location.pathname === "/config-editor"} isConnected={isConnected} />
-          <SidebarItem icon={HardDrive} label={isSidebarOpen ? "Yedekleme" : ""} to="/backups" active={location.pathname === "/backups"} isConnected={isConnected} />
-          <SidebarItem icon={ArrowRightLeft} label={isSidebarOpen ? "Proto Senkron" : ""} to="/proto-sync" active={location.pathname === "/proto-sync"} isConnected={isConnected} />
-          <SidebarItem icon={ShoppingBag} label={isSidebarOpen ? "Marketler" : ""} to="/shops" active={location.pathname === "/shops"} isConnected={isConnected} />
-          <SidebarItem icon={Store} label={isSidebarOpen ? "Market İçerikleri" : ""} to="/shop-items" active={location.pathname === "/shop-items"} isConnected={isConnected} />
-          <SidebarItem icon={Box} label={isSidebarOpen ? "Eşya Düşme (Drop)" : ""} to="/drops" active={location.pathname === "/drops"} isConnected={isConnected} />
-          <SidebarItem icon={ScrollText} label={isSidebarOpen ? "Questler" : ""} to="/quests" active={location.pathname === "/quests"} isConnected={isConnected} />
-          <SidebarItem icon={ShieldCheck} label={isSidebarOpen ? "GM Yönetimi" : ""} to="/gms" active={location.pathname === "/gms"} isConnected={isConnected} />
-          <SidebarItem icon={History} label={isSidebarOpen ? "Sistem Logları" : ""} to="/logs" active={location.pathname === "/logs"} isConnected={isConnected} />
-          
-          <div className="pt-4 pb-2 px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            {isSidebarOpen ? "Sistem" : "---"}
-          </div>
-          <SidebarItem icon={Zap} label={isSidebarOpen ? "Sunucu Ayarları" : ""} to="/server-settings" active={location.pathname === "/server-settings"} isConnected={isConnected} />
-          <SidebarItem icon={Box} label={isSidebarOpen ? "Oyun Verileri" : ""} to="/game-data" active={location.pathname === "/game-data"} isConnected={isConnected} />
-          <SidebarItem icon={FolderTree} label={isSidebarOpen ? "Dosyalar" : ""} to="/files" active={location.pathname === "/files"} isConnected={isConnected} />
-          <SidebarItem icon={Database} label={isSidebarOpen ? "Veritabanı" : ""} to="/db" active={location.pathname === "/db"} isConnected={isConnected} />
-          <SidebarItem icon={Terminal} label={isSidebarOpen ? "Console" : ""} to="/console" active={location.pathname === "/console"} isConnected={isConnected} />
+          <SidebarItem icon={FileCode} label="Proto Editörü" to="/proto-editor" active={location.pathname === "/proto-editor"} isConnected={isConnected} />
+          <SidebarItem icon={Zap} label="Beceriler" to="/skills" active={location.pathname === "/skills"} isConnected={isConnected} />
+          <SidebarItem icon={RefreshCw} label="Yükseltmeler" to="/refines" active={location.pathname === "/refines"} isConnected={isConnected} />
+          <SidebarItem icon={Sparkles} label="Efsunlar" to="/item-attrs" active={location.pathname === "/item-attrs"} isConnected={isConnected} />
+          <SidebarItem icon={Terminal} label="Console" to="/console" active={location.pathname === "/console"} isConnected={isConnected} />
         </nav>
 
-        <div className="p-4 border-t space-y-2">
-          <SidebarItem icon={SettingsIcon} label={isSidebarOpen ? "Ayarlar" : ""} to="/settings" active={location.pathname === "/settings"} isConnected={isConnected} />
-          <SidebarItem icon={Database} label={isSidebarOpen ? "Yollar & Eşleştirmeler" : ""} to="/system-mappings" active={location.pathname === "/system-mappings"} isConnected={isConnected} />
+        <div className="mt-auto px-4 pt-4 border-t border-white/5">
           <button 
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-destructive/10 text-destructive transition-all duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3 text-error/80 hover:text-error hover:bg-error/5 transition-all duration-300 rounded-lg font-medium text-sm uppercase tracking-widest"
           >
-            <LogOut size={20} />
-            {isSidebarOpen && <span className="font-medium">Çıkış Yap</span>}
+            <LogOut size={18} />
+            <span>Güvenli Çıkış</span>
           </button>
         </div>
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto relative">
+      <main className={`flex-1 overflow-auto relative pt-16 transition-all duration-300 ${isSidebarOpen ? "ml-[260px]" : "ml-0"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -231,13 +193,13 @@ const Layout = ({ children, onLogout, isConnected }: { children: React.ReactNode
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="p-8"
+            className="p-8 min-h-screen"
           >
             {children}
           </motion.div>
         </AnimatePresence>
       </main>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" theme="dark" />
     </div>
   );
 };
