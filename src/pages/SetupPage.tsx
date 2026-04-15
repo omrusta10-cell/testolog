@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Server, Shield, Database, Key, Globe, LogIn } from "lucide-react";
+import React, { useState } from "react";
+import { Server, Shield, Database, Key, Globe, LogIn, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { toast } from "sonner";
 import api from "../lib/api";
+import { useAppContext } from "../context/AppContext";
 
-export default function SetupPage({ onConnected }: { onConnected: () => void }) {
+export default function SetupPage() {
+  const { setConnected } = useAppContext();
   const [creds, setCreds] = useState({
     sshHost: "",
     sshPort: "22",
@@ -33,7 +35,7 @@ export default function SetupPage({ onConnected }: { onConnected: () => void }) 
     try {
       await api.get("/api/test-connection");
       toast.success("Bağlantı başarılı!");
-      onConnected();
+      setConnected(true, creds);
     } catch (err: any) {
       localStorage.removeItem("game_panel_creds");
       toast.error("Bağlantı hatası: " + (err.response?.data?.error || err.message));
@@ -43,7 +45,7 @@ export default function SetupPage({ onConnected }: { onConnected: () => void }) 
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background">
+    <div className="flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl shadow-2xl border-primary/20 backdrop-blur-sm bg-card/80">
         <CardHeader className="text-center space-y-1">
           <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
@@ -55,6 +57,18 @@ export default function SetupPage({ onConnected }: { onConnected: () => void }) 
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
+            <Info className="text-red-500 shrink-0 mt-0.5" size={20} />
+            <div className="text-sm text-red-500">
+              <strong className="block mb-1 text-red-600 text-lg">Nasıl Bağlanılır?</strong>
+              <ul className="list-disc pl-4 space-y-1">
+                <li><strong>SSH Ayarları:</strong> Sunucunuzun IP adresini, SSH portunu (genelde 22), kullanıcı adını (genelde root) ve şifresini girin. Bu bilgiler, sunucu dosyalarınızı (/usr/game) yönetmek içindir.</li>
+                <li><strong>MySQL Ayarları:</strong> Veritabanı IP adresinizi (aynı sunucudaysa IP'yi yazın), portunu (genelde 3306), kullanıcı adını ve şifresini girin.</li>
+                <li>Bağlantı sağlandıktan sonra tüm panel özellikleri aktifleşecektir.</li>
+              </ul>
+            </div>
+          </div>
+
           <Tabs defaultValue="ssh" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="ssh" className="gap-2">

@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 export default function PlayerManager() {
+  const { tableMappings } = useAppContext();
   const [players, setPlayers] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -20,13 +22,17 @@ export default function PlayerManager() {
   const fetchPlayersAndAccounts = async () => {
     setLoading(true);
     try {
+      // Use mapped table names if available
+      const playerTable = tableMappings["player"] || "player";
+      const accountTable = tableMappings["account"] || "account";
+
       // Fetch players
-      const playerRes = await api.get("/api/db/data?table=player", {
+      const playerRes = await api.get(`/api/db/data?table=${playerTable}`, {
         headers: { "x-db-name-override": "player" }
       });
       
       // Fetch accounts for mapping
-      const accRes = await api.get("/api/db/data?table=account", {
+      const accRes = await api.get(`/api/db/data?table=${accountTable}`, {
         headers: { "x-db-name-override": "account" }
       });
 

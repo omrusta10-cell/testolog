@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import Editor from "@monaco-editor/react";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { useAppContext } from "../context/AppContext";
 
 interface FileItem {
   name: string;
@@ -16,7 +17,9 @@ interface FileItem {
 }
 
 export default function FileExplorer() {
-  const [currentPath, setCurrentPath] = useState("/usr/game");
+  const { sshPaths } = useAppContext();
+  const defaultPath = sshPaths["game_dir"] || "/usr/game";
+  const [currentPath, setCurrentPath] = useState(defaultPath);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);

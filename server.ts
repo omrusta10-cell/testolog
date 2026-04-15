@@ -38,13 +38,17 @@ const getSSHClient = (headers: any) => {
         console.log("SSH Connection Ready");
         resolve(conn);
       })
-      .on("error", (err) => {
+      .on("error", (err: any) => {
         console.error("SSH Connection Error:", err.message);
-        reject(err);
+        if (err.message.includes("Timed out while waiting for handshake")) {
+          reject(new Error("SSH Bağlantı Zaman Aşımı: Sunucuya ulaşılamıyor. Lütfen IP/Port bilgilerini kontrol edin, sunucu güvenlik duvarının (firewall) dış bağlantılara izin verdiğinden emin olun veya yerel bir IP (192.168.x.x) kullanmadığınızı doğrulayın."));
+        } else {
+          reject(err);
+        }
       })
       .on("timeout", () => {
         console.error("SSH Connection Timeout");
-        reject(new Error("SSH Connection Timeout (Handshake failed)"));
+        reject(new Error("SSH Bağlantı Zaman Aşımı: Sunucu yanıt vermiyor."));
       })
       .connect(config);
   });
@@ -243,42 +247,165 @@ app.get("/api/test-connection", async (req, res) => {
   }
 });
 
+import { GoogleGenAI, Type } from "@google/genai";
+
 // Get Real Stats
 app.get("/api/stats", async (req, res) => {
   try {
-    const sshConn = await getSSHClient(req.headers);
-    
-    // Fetch CPU and RAM using FreeBSD commands
-    const getStats = () => new Promise<string>((resolve) => {
-      sshConn.exec("top -b -d1 | grep 'CPU:'; vmstat -s | grep 'pages free'; sysctl hw.physmem; df -h / | tail -1", (err, stream) => {
-        if (err) return resolve("");
-        let data = "";
-        stream.on("data", (d: any) => data += d).on("close", () => resolve(data));
+    let rawStats = "";
+    let onlinePlayers = 0;
+    let status = "Aktif";
+
+    try {
+      const sshConn = await getSSHClient(req.headers);
+      
+      // Fetch CPU and RAM using FreeBSD commands
+      const getStats = () => new Promise<string>((resolve) => {
+        sshConn.exec("top -b -d1 | grep 'CPU:'; vmstat -s | grep 'pages free'; sysctl hw.physmem; df -h / | tail -1", (err, stream) => {
+          if (err) return resolve("");
+          let data = "";
+          stream.on("data", (d: any) => data += d).on("close", () => resolve(data));
+        });
       });
-    });
 
-    const rawStats = await getStats() as string;
-    sshConn.end();
+      rawStats = await getStats() as string;
+      sshConn.end();
+    } catch (sshError: any) {
+      console.error("Stats SSH Error:", sshError.message);
+      status = "SSH Bağlantı Hatası";
+    }
 
-    // Fetch Online Players from DB
-    const db = await getDbConnection(req.headers);
-    const [playerRows]: any = await db.query("SELECT COUNT(*) as count FROM player WHERE last_play > NOW() - INTERVAL 5 MINUTE");
-    await db.end();
+    try {
+      // Fetch Online Players from DB
+      const db = await getDbConnection(req.headers);
+      const [playerRows]: any = await db.query("SELECT COUNT(*) as count FROM player WHERE last_play > NOW() - INTERVAL 5 MINUTE");
+      onlinePlayers = playerRows[0]?.count || 0;
+      await db.end();
+    } catch (dbError: any) {
+      console.error("Stats DB Error:", dbError.message);
+      if (status === "Aktif") status = "DB Bağlantı Hatası";
+      else status = "Bağlantı Hatası (SSH & DB)";
+    }
 
     // Simple parser for raw stats
     const lines = rawStats.split("\n");
     const cpuLine = lines.find(l => l.includes("CPU:")) || "";
-    const cpuUsage = cpuLine.match(/(\d+\.\d+)% idle/) ? (100 - parseFloat(cpuLine.match(/(\d+\.\d+)% idle/)![1])).toFixed(1) + "%" : "12%";
+    const cpuUsage = cpuLine.match(/(\d+\.\d+)% idle/) ? (100 - parseFloat(cpuLine.match(/(\d+\.\d+)% idle/)![1])).toFixed(1) + "%" : (rawStats ? "12%" : "Bilinmiyor");
     
     res.json({
-      onlinePlayers: playerRows[0]?.count || 0,
+      onlinePlayers: onlinePlayers,
       cpuUsage: cpuUsage,
-      diskUsage: rawStats.includes("/") ? rawStats.split(/\s+/).filter(Boolean)[2] + " / " + rawStats.split(/\s+/).filter(Boolean)[1] : "42 GB",
-      ramUsage: "Aktif", // Simplified for now
-      status: "Aktif"
+      diskUsage: rawStats.includes("/") ? rawStats.split(/\s+/).filter(Boolean)[2] + " / " + rawStats.split(/\s+/).filter(Boolean)[1] : (rawStats ? "42 GB" : "Bilinmiyor"),
+      ramUsage: rawStats ? "Aktif" : "Bilinmiyor", // Simplified for now
+      status: status
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Chat Endpoint (SambaNova Integration)
+app.post("/api/chat", async (req, res) => {
+  const { message, history } = req.body;
+  
+  // SambaNova API Key - Kullanıcıdan alınan key buraya eklenecek
+  const apiKey = process.env.SAMBANOVA_API_KEY || "74994ef5-af24-4675-b1e2-84d66ac62486";
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "SambaNova API anahtarı bulunamadı. Lütfen anahtarınızı girin." });
+  }
+
+  try {
+    const systemInstruction = `Sen Metin2 Yönetim Paneli asistanısın. Bu sistemi Uğur Kaya - ITJA geliştirmiştir. 
+Sadece bu sistem ve Metin2 sunucu yönetimi hakkında bilgi ver. 
+Kullanıcının veritabanı tabloları farklıysa (örneğin player yerine oyuncu), bunu tespit edip sistemi ona göre entegre edebilirsin.
+Bunu yapmak için 'update_table_mapping' aracını kullan. Örneğin kullanıcı "benim oyuncu tablomun adı oyuncu" derse, originalTable: "player", newTable: "oyuncu" olarak aracı çağır.
+Kullanıcıya yardımcı olurken nazik ve profesyonel ol.`;
+
+    // Format messages for SambaNova (OpenAI format)
+    const formattedMessages = [
+      { role: "system", content: systemInstruction },
+      ...history.map((msg: any) => ({
+        role: msg.role === "model" ? "assistant" : "user",
+        content: msg.content
+      })),
+      { role: "user", content: message }
+    ];
+
+    const response = await fetch("https://api.sambanova.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "Meta-Llama-3.3-70B-Instruct", // SambaNova model
+        messages: formattedMessages,
+        temperature: 0.7,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "update_table_mapping",
+              description: "Veritabanı tablo isimlerini kullanıcının sistemine göre eşleştirir/değiştirir.",
+              parameters: {
+                type: "object",
+                properties: {
+                  originalTable: {
+                    type: "string",
+                    description: "Sistemin varsayılan tablo adı (örneğin: player, item_proto, account)"
+                  },
+                  newTable: {
+                    type: "string",
+                    description: "Kullanıcının veritabanındaki yeni tablo adı (örneğin: oyuncu, esyalar, hesap)"
+                  }
+                },
+                required: ["originalTable", "newTable"]
+              }
+            }
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.text();
+      throw new Error(`SambaNova API Hatası: ${errData}`);
+    }
+
+    const data = await response.json();
+    const messageObj = data.choices[0].message;
+    let replyText = messageObj.content || "";
+    let mappingUpdate = null;
+
+    if (messageObj.tool_calls && messageObj.tool_calls.length > 0) {
+      const toolCall = messageObj.tool_calls.find((tc: any) => tc.function.name === "update_table_mapping");
+      if (toolCall) {
+        try {
+          const args = JSON.parse(toolCall.function.arguments);
+          mappingUpdate = {
+            original: args.originalTable,
+            new: args.newTable
+          };
+          if (!replyText) {
+            replyText = `Sistem entegre edildi: '${args.originalTable}' tablosu artık '${args.newTable}' olarak kullanılacak. Başka bir isteğiniz var mı?`;
+          }
+        } catch (e) {
+          console.error("Tool args parse error", e);
+        }
+      }
+    }
+    
+    res.json({ reply: replyText, mappingUpdate });
+  } catch (error: any) {
+    console.error("SambaNova Error:", error);
+    if (error.message?.includes("API key not valid") || error.message?.includes("Unauthorized")) {
+      return res.status(400).json({ error: "Geçersiz SambaNova API Anahtarı. Lütfen geçerli bir anahtar girin." });
+    }
+    if (error.message?.includes("Rate limit exceeded") || error.message?.includes("rate_limit_exceeded")) {
+      return res.status(429).json({ error: "SambaNova API kota sınırına (Rate Limit) ulaşıldı. Lütfen biraz bekleyip tekrar deneyin." });
+    }
+    res.status(500).json({ error: "Yapay zeka yanıt veremedi." });
   }
 });
 

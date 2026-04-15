@@ -16,6 +16,20 @@ api.interceptors.request.use((config) => {
     config.headers["x-db-password"] = parsed.dbPassword;
     config.headers["x-db-name"] = parsed.dbName;
   }
+
+  // Apply table mappings if the request is for /api/db/data or /api/db/query
+  const mappings = localStorage.getItem("mt2_table_mappings");
+  if (mappings && config.url?.includes("/api/db/data")) {
+    const parsedMappings = JSON.parse(mappings);
+    // Parse URL params
+    const url = new URL(config.url, window.location.origin);
+    const table = url.searchParams.get("table");
+    if (table && parsedMappings[table]) {
+      url.searchParams.set("table", parsedMappings[table]);
+      config.url = url.pathname + url.search;
+    }
+  }
+
   return config;
 });
 
